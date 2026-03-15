@@ -34,7 +34,6 @@ class HealthSelectionActivity : AppCompatActivity() {
 
         val isEditing = intent.getBooleanExtra("IS_EDITING_PROFILE", false)
 
-        // Setup Checkbox list
         checkboxes.apply {
             add(binding.cbCat1) // Blood Sugar Regulation
             add(binding.cbCat2) // Cardiovascular
@@ -45,7 +44,6 @@ class HealthSelectionActivity : AppCompatActivity() {
             add(binding.cbCat7) // Not Sure
         }
 
-        // Logic for mutually exclusive "No Specific" and "Not Sure"
         val exclusiveBoxes = listOf(binding.cbCat6, binding.cbCat7)
         val normalBoxes = checkboxes.filter { it !in exclusiveBoxes }
 
@@ -67,7 +65,6 @@ class HealthSelectionActivity : AppCompatActivity() {
 
         binding.btnBack.setOnClickListener { finish() }
 
-        // Setup Search Suggestion logic
         binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -95,23 +92,28 @@ class HealthSelectionActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        // Setup Apply Suggestion
         binding.btnApplySuggestion.setOnClickListener {
             val suggestedCategory = binding.tvSuggestedCategory.text.toString()
             checkCategory(suggestedCategory)
-            
-            // Optionally clear the search box after applying
             binding.etSearch.text?.clear()
             binding.llSuggestion.visibility = View.GONE
         }
 
-        // Setup Continue
         binding.btnContinue.setOnClickListener {
             if (checkboxes.any { it.isChecked }) {
-                // Next step in flow: SensitivitySelectionActivity
+                val selectedConditions = ArrayList<String>()
+                val conditionKeys = listOf("blood_sugar", "cardiovascular", "hormonal", "digestive", "allergy_immune", "no_specific", "not_sure")
+                for (i in checkboxes.indices) {
+                    if (checkboxes[i].isChecked) {
+                        selectedConditions.add(conditionKeys[i])
+                    }
+                }
+
                 val intent = Intent(this, SensitivitySelectionActivity::class.java)
                 val isEditing = getIntent().getBooleanExtra("IS_EDITING_PROFILE", false)
                 intent.putExtra("IS_EDITING_PROFILE", isEditing)
+                intent.putExtra("AGE_GROUP", getIntent().getStringExtra("AGE_GROUP"))
+                intent.putStringArrayListExtra("CONDITIONS", selectedConditions)
                 startActivity(intent)
             } else {
                 Toast.makeText(this, "Please select at least one health risk category", Toast.LENGTH_SHORT).show()
@@ -123,7 +125,6 @@ class HealthSelectionActivity : AppCompatActivity() {
         val targetBox = checkboxes.find { it.text.toString() == categoryText }
         if (targetBox != null) {
             targetBox.isChecked = true
-            // Also scroll up to show the selection?
         }
     }
 }

@@ -15,8 +15,28 @@ class ProfileSuccessActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val isEditing = intent.getBooleanExtra("IS_EDITING_PROFILE", false)
-        
-        // Update Title/Description if editing
+
+        // Send health profile to backend
+        val ageGroup = intent.getStringExtra("AGE_GROUP") ?: "Adult"
+        val conditions = intent.getStringArrayListExtra("CONDITIONS") ?: arrayListOf()
+        val sensitivities = intent.getStringArrayListExtra("SENSITIVITIES") ?: arrayListOf()
+        val customSensitivities = intent.getStringArrayListExtra("CUSTOM_SENSITIVITIES") ?: arrayListOf()
+
+        val body = mapOf<String, Any>(
+            "age_group" to ageGroup,
+            "conditions" to conditions,
+            "sensitivities" to sensitivities,
+            "custom_sensitivities" to customSensitivities
+        )
+
+        ApiClient.postAuth(this, "/user/health-profile", body) { success, json ->
+            runOnUiThread {
+                if (!success) {
+                    android.widget.Toast.makeText(this, "Failed to save health profile", android.widget.Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
         if (isEditing) {
             binding.tvTitle.text = "Profile Updated Successfully!"
             binding.tvSubtitle.text = "Your health preferences have been saved."
@@ -25,7 +45,6 @@ class ProfileSuccessActivity : AppCompatActivity() {
 
         binding.btnReturnSign.setOnClickListener {
             if (isEditing) {
-                // Go back to the profile navigation stack (PersonalDetails -> Profile -> Home)
                 val intent = Intent(this, PersonalDetailsActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                 startActivity(intent)
@@ -38,7 +57,6 @@ class ProfileSuccessActivity : AppCompatActivity() {
         }
 
         binding.btnEditProfile.setOnClickListener {
-            // For now, this could just return to the beginning of the onboarding or finish
             val intent = Intent(this, AgeSelectionActivity::class.java)
             if (isEditing) {
                 intent.putExtra("IS_EDITING_PROFILE", true)

@@ -14,17 +14,36 @@ class VerifyOtpActivity : AppCompatActivity() {
         binding = ActivityVerifyOtpBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Set up click listener for Back button
+        val email = intent.getStringExtra("EMAIL") ?: ""
+
         binding.btnBack.setOnClickListener {
-            finish() // Navigates back to Forget Password
+            finish()
         }
 
-        // Set up click listener for Verify Code button
         binding.btnVerifyCode.setOnClickListener {
             val otpCode = "${binding.etOtp1.text}${binding.etOtp2.text}${binding.etOtp3.text}${binding.etOtp4.text}"
-            // In a real app, verify the OTP here
-            // On success, navigate to New Password screen
-            startActivity(Intent(this, NewPasswordActivity::class.java))
+            if (otpCode.length != 4) {
+                android.widget.Toast.makeText(this, "Please enter the 4-digit code", android.widget.Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            binding.btnVerifyCode.isEnabled = false
+
+            ApiClient.post("/auth/verify-otp", mapOf("email" to email, "otp" to otpCode)) { success, json ->
+                runOnUiThread {
+                    binding.btnVerifyCode.isEnabled = true
+                    if (success && json?.get("success")?.asBoolean == true) {
+                        val resetToken = json.get("reset_token").asString
+                        val intent = Intent(this, NewPasswordActivity::class.java)
+                        intent.putExtra("EMAIL", email)
+                        intent.putExtra("RESET_TOKEN", resetToken)
+                        startActivity(intent)
+                    } else {
+                        val message = json?.get("message")?.asString ?: "OTP verification failed"
+                        android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
         }
 
         setupOtpInputs()
@@ -32,7 +51,7 @@ class VerifyOtpActivity : AppCompatActivity() {
 
     private fun setupOtpInputs() {
         val editTexts = arrayOf(binding.etOtp1, binding.etOtp2, binding.etOtp3, binding.etOtp4)
-        
+
         for (i in editTexts.indices) {
             editTexts[i].addTextChangedListener(object : android.text.TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}

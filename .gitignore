@@ -13,3 +13,12 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Keystore
+*.jks
+
+# Backend
+backend/.env
+backend/uploads/
+backend/__pycache__/
+backend/*.pyc

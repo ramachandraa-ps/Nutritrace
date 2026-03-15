@@ -20,9 +20,7 @@ class SensitivitySelectionActivity : AppCompatActivity() {
         if (result.resultCode == Activity.RESULT_OK) {
             val customSens = result.data?.getStringExtra("CUSTOM_SENSITIVITY")
             if (customSens != null) {
-                // Add a new chip dynamically
                 addCustomChip(customSens)
-                // Clear "None" if previously selected
                 binding.chipNone.isChecked = false
             }
         }
@@ -42,24 +40,20 @@ class SensitivitySelectionActivity : AppCompatActivity() {
             binding.chipArtificialSweet
         )
 
-        // Setup custom checked state colors for chips
         val checkedColor = ContextCompat.getColor(this, R.color.primary_green)
-        val defaultBorderColor = android.graphics.Color.parseColor("#E0E0E0")
         val defaultBgColor = ContextCompat.getColor(this, R.color.white)
-        
-        // Define a state list for background
+
         val bgStateList = ColorStateList(
             arrayOf(
                 intArrayOf(android.R.attr.state_checked),
                 intArrayOf(-android.R.attr.state_checked)
             ),
             intArrayOf(
-                (checkedColor and 0x00FFFFFF) or 0x1A000000, // 10% opacity green
+                (checkedColor and 0x00FFFFFF) or 0x1A000000,
                 defaultBgColor
             )
         )
 
-        // Define a state list for stroke
         val strokeStateList = ColorStateList(
             arrayOf(
                 intArrayOf(android.R.attr.state_checked),
@@ -70,14 +64,13 @@ class SensitivitySelectionActivity : AppCompatActivity() {
                 android.graphics.Color.parseColor("#E0E0E0")
             )
         )
-        
+
         val allChips = chips + binding.chipNone
         allChips.forEach { chip ->
             chip.chipBackgroundColor = bgStateList
             chip.chipStrokeColor = strokeStateList
         }
 
-        // Handle "None" mutual exclusivity
         for (chip in chips) {
             chip.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) {
@@ -88,10 +81,7 @@ class SensitivitySelectionActivity : AppCompatActivity() {
 
         binding.chipNone.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                // Uncheck standard chips
                 chips.forEach { it.isChecked = false }
-                
-                // Clear custom ones visually
                 for (i in 0 until binding.cgSensitivities.childCount) {
                     val view = binding.cgSensitivities.getChildAt(i)
                     if (view is Chip && view != binding.chipNone && !chips.contains(view)) {
@@ -108,9 +98,7 @@ class SensitivitySelectionActivity : AppCompatActivity() {
             addCustomLauncher.launch(intent)
         }
 
-        // Finish Setup Button
         binding.btnFinish.setOnClickListener {
-            // Check if any chip in the group is checked
             var isAnyChecked = false
             for (i in 0 until binding.cgSensitivities.childCount) {
                 val view = binding.cgSensitivities.getChildAt(i)
@@ -119,12 +107,27 @@ class SensitivitySelectionActivity : AppCompatActivity() {
                     break
                 }
             }
-            
+
             if (isAnyChecked) {
-                // Navigate to Success Profile Action
+                val selectedSensitivities = ArrayList<String>()
+                val customSens = ArrayList<String>()
+                val predefinedChips = listOf(binding.chipDairy, binding.chipNuts, binding.chipGluten, binding.chipSulfites, binding.chipArtificialColors, binding.chipArtificialSweet)
+                val predefinedNames = listOf("Dairy", "Nuts", "Gluten", "Sulfites", "Artificial Colors", "Artificial Sweeteners")
+
+                for (i in predefinedChips.indices) {
+                    if (predefinedChips[i].isChecked) {
+                        selectedSensitivities.add(predefinedNames[i])
+                    }
+                }
+                customSens.addAll(customSensitivities)
+
                 val intent = Intent(this, ProfileSuccessActivity::class.java)
                 val isEditing = getIntent().getBooleanExtra("IS_EDITING_PROFILE", false)
                 intent.putExtra("IS_EDITING_PROFILE", isEditing)
+                intent.putExtra("AGE_GROUP", getIntent().getStringExtra("AGE_GROUP"))
+                intent.putStringArrayListExtra("CONDITIONS", getIntent().getStringArrayListExtra("CONDITIONS"))
+                intent.putStringArrayListExtra("SENSITIVITIES", selectedSensitivities)
+                intent.putStringArrayListExtra("CUSTOM_SENSITIVITIES", customSens)
                 startActivity(intent)
                 finish()
             } else {
@@ -132,7 +135,7 @@ class SensitivitySelectionActivity : AppCompatActivity() {
             }
         }
     }
-    
+
     private fun addCustomChip(text: String) {
         val newChip = Chip(this).apply {
             this.text = text
@@ -143,11 +146,10 @@ class SensitivitySelectionActivity : AppCompatActivity() {
                 binding.cgSensitivities.removeView(this)
                 customSensitivities.remove(text)
             }
-            
-            // Apply custom styles
+
             val checkedColor = ContextCompat.getColor(context, R.color.primary_green)
             val defaultBgColor = ContextCompat.getColor(context, R.color.white)
-            
+
             chipBackgroundColor = ColorStateList(
                 arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf(-android.R.attr.state_checked)),
                 intArrayOf((checkedColor and 0x00FFFFFF) or 0x1A000000, defaultBgColor)
@@ -158,16 +160,14 @@ class SensitivitySelectionActivity : AppCompatActivity() {
             )
             chipStrokeWidth = 1f * resources.displayMetrics.density
             setTextColor(ContextCompat.getColor(context, R.color.text_dark))
-            
-            // Make sure none is unchecked
+
             setOnCheckedChangeListener { _, isChecked ->
                 if(isChecked) {
                     binding.chipNone.isChecked = false
                 }
             }
         }
-        
-        // Add to group right before 'None'
+
         val noneIndex = binding.cgSensitivities.indexOfChild(binding.chipNone)
         binding.cgSensitivities.addView(newChip, if (noneIndex >= 0) noneIndex else binding.cgSensitivities.childCount)
         customSensitivities.add(text)

@@ -11,6 +11,15 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("../nutritrace-release.jks")
+            storePassword = "nutritrace123"
+            keyAlias = "nutritrace"
+            keyPassword = "nutritrace123"
+        }
+    }
+
     defaultConfig {
         applicationId = "com.simats.nutritrace"
         minSdk = 34
@@ -28,6 +37,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {

@@ -16,7 +16,7 @@ import com.simats.nutritrace.databinding.ActivityChangePasswordBinding
 class ChangePasswordActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityChangePasswordBinding
-    
+
     private var isCurrentPasswordVisible = false
     private var isNewPasswordVisible = false
     private var isConfirmPasswordVisible = false
@@ -26,85 +26,74 @@ class ChangePasswordActivity : AppCompatActivity() {
         binding = ActivityChangePasswordBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Handle Back button
         binding.btnBack.setOnClickListener {
             finish()
         }
 
-        // Initially disable change password button
         binding.btnChangePassword.isEnabled = false
         binding.btnChangePassword.alpha = 0.5f
-        
+
         setupValidations()
 
-        // Handle Cancel button
         binding.btnCancel.setOnClickListener {
             finish()
         }
 
-        // Handle Password Visibility Toggles
         binding.ivToggleCurrentPassword.setOnClickListener {
             isCurrentPasswordVisible = togglePasswordVisibility(
-                binding.etCurrentPassword, 
-                binding.ivToggleCurrentPassword, 
+                binding.etCurrentPassword,
+                binding.ivToggleCurrentPassword,
                 isCurrentPasswordVisible
             )
         }
-
         binding.ivToggleNewPassword.setOnClickListener {
             isNewPasswordVisible = togglePasswordVisibility(
-                binding.etNewPassword, 
-                binding.ivToggleNewPassword, 
+                binding.etNewPassword,
+                binding.ivToggleNewPassword,
                 isNewPasswordVisible
             )
         }
-
         binding.ivToggleConfirmPassword.setOnClickListener {
             isConfirmPasswordVisible = togglePasswordVisibility(
-                binding.etConfirmNewPassword, 
-                binding.ivToggleConfirmPassword, 
+                binding.etConfirmNewPassword,
+                binding.ivToggleConfirmPassword,
                 isConfirmPasswordVisible
             )
         }
 
-        // Handle Change Password button
         binding.btnChangePassword.setOnClickListener {
             val current = binding.etCurrentPassword.text.toString()
             val newPass = binding.etNewPassword.text.toString()
             val confirm = binding.etConfirmNewPassword.text.toString()
 
-            if (current.isEmpty() || newPass.isEmpty() || confirm.isEmpty()) {
-                Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            if (newPass.length < 8) {
-                Toast.makeText(this, "New password must be at least 8 characters", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            if (newPass != confirm) {
-                Toast.makeText(this, "New passwords do not match", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // In a real app, API call goes here
             binding.btnChangePassword.isEnabled = false
-            
-            // Show Success Dialog
-            val dialogView = layoutInflater.inflate(R.layout.dialog_change_password_success, null)
-            val dialog = android.app.AlertDialog.Builder(this)
-                .setView(dialogView)
-                .setCancelable(false)
-                .create()
-                
-            dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-            dialog.show()
-            
-            Handler(Looper.getMainLooper()).postDelayed({
-                dialog.dismiss()
-                finish()
-            }, 2000)
+
+            ApiClient.postAuth(this, "/auth/change-password", mapOf(
+                "current_password" to current,
+                "new_password" to newPass,
+                "confirm_password" to confirm
+            )) { success, json ->
+                runOnUiThread {
+                    binding.btnChangePassword.isEnabled = true
+                    if (success && json?.get("success")?.asBoolean == true) {
+                        val dialogView = layoutInflater.inflate(R.layout.dialog_change_password_success, null)
+                        val dialog = android.app.AlertDialog.Builder(this)
+                            .setView(dialogView)
+                            .setCancelable(false)
+                            .create()
+                        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+                        dialog.show()
+
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            dialog.dismiss()
+                            finish()
+                        }, 2000)
+                    } else {
+                        val message = json?.get("message")?.asString ?: "Failed to change password"
+                        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
         }
     }
 
@@ -116,7 +105,7 @@ class ChangePasswordActivity : AppCompatActivity() {
             }
             override fun afterTextChanged(s: android.text.Editable?) {}
         }
-        
+
         binding.etCurrentPassword.addTextChangedListener(textWatcher)
         binding.etConfirmNewPassword.addTextChangedListener(textWatcher)
 
@@ -134,11 +123,6 @@ class ChangePasswordActivity : AppCompatActivity() {
                 binding.llPasswordChecklist.visibility = View.VISIBLE
             }
         }
-        
-        // Use standard error on the field layout or edit text
-        // ChangePassword layout uses raw EditText inside a LinearLayout, 
-        // so we can't use TextInputLayout.error immediately. 
-        // We will just validate on button click or check the confirm matching live.
     }
 
     private fun updatePasswordChecklist(password: String) {
@@ -158,7 +142,7 @@ class ChangePasswordActivity : AppCompatActivity() {
     private fun updateChecklistItem(textView: TextView, isValid: Boolean) {
         val color = if (isValid) ContextCompat.getColor(this, R.color.primary_green) else ContextCompat.getColor(this, android.R.color.holo_red_dark)
         val icon = if (isValid) ContextCompat.getDrawable(this, R.drawable.ic_check) else ContextCompat.getDrawable(this, R.drawable.ic_close)
-        
+
         textView.setTextColor(color)
         textView.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null)
         textView.compoundDrawableTintList = android.content.res.ColorStateList.valueOf(color)
@@ -185,15 +169,12 @@ class ChangePasswordActivity : AppCompatActivity() {
 
     private fun togglePasswordVisibility(editText: EditText, icon: ImageView, isVisible: Boolean): Boolean {
         if (isVisible) {
-            // Hide password
             editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
             icon.setImageResource(R.drawable.ic_eye_outline)
         } else {
-            // Show password
             editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
             icon.setImageResource(R.drawable.ic_eye_off_outline)
         }
-        // Move cursor to the end
         editText.setSelection(editText.text.length)
         return !isVisible
     }

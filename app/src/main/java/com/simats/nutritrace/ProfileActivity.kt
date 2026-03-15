@@ -16,76 +16,80 @@ class ProfileActivity : AppCompatActivity() {
 
         val bottomNavCard = findViewById<androidx.cardview.widget.CardView>(R.id.bottomNavCard)
         val mainScrollView = findViewById<android.widget.ScrollView>(R.id.mainScrollView)
-        
-        // Find the inner LinearLayout of the CardView to apply padding to
         val navContainer = bottomNavCard.getChildAt(0)
 
         androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { view, windowInsets ->
             val insets = windowInsets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
-            
-            // Apply padding to the inner container so the background extends to the bottom
             navContainer.setPadding(
                 navContainer.paddingLeft,
                 navContainer.paddingTop,
                 navContainer.paddingRight,
-                insets.bottom // Just the inset, no extra gap
+                insets.bottom
             )
-
             bottomNavCard.post {
                 val navHeight = bottomNavCard.height
                 mainScrollView?.setPadding(
                     mainScrollView.paddingLeft,
                     mainScrollView.paddingTop,
                     mainScrollView.paddingRight,
-                    navHeight // Scroll up above the *total* height of the nav (including its new pad)
+                    navHeight
                 )
             }
             windowInsets
         }
 
-        // Navigation
         binding.navHome.setOnClickListener {
             val intent = Intent(this, HomeActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
             finish()
         }
-
         binding.navCompare.setOnClickListener {
             val intent = Intent(this, CompareActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
             finish()
         }
-
         binding.navHistory.setOnClickListener {
             val intent = Intent(this, ScanHistoryActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
             finish()
         }
-
         binding.btnScanNav.setOnClickListener {
             startActivity(Intent(this, ScanIngredientsActivity::class.java))
         }
 
-        // Profile Section Navigation
+        // Load user info into profile header
+        val prefs = getSharedPreferences("NutriTracePrefs", MODE_PRIVATE)
+        val savedName = prefs.getString("USER_FULLNAME", null)
+        val savedEmail = prefs.getString("USER_EMAIL", null)
+        if (savedName != null) binding.tvProfileName.text = savedName
+        if (savedEmail != null) binding.tvProfileEmail.text = savedEmail
+
+        // Also fetch fresh data from backend
+        ApiClient.getAuth(this, "/user/profile") { success, json ->
+            runOnUiThread {
+                if (success && json?.get("success")?.asBoolean == true) {
+                    val user = json.getAsJsonObject("user")
+                    binding.tvProfileName.text = user.get("fullname")?.asString ?: ""
+                    binding.tvProfileEmail.text = user.get("email")?.asString ?: ""
+                }
+            }
+        }
+
         binding.llPersonalDetails.setOnClickListener {
             startActivity(Intent(this, PersonalDetailsActivity::class.java))
         }
-
         binding.llChangePassword.setOnClickListener {
             startActivity(Intent(this, ChangePasswordActivity::class.java))
         }
-
         binding.llPrivacyPolicy.setOnClickListener {
             startActivity(Intent(this, PrivacyPolicyActivity::class.java))
         }
-
         binding.llTerms.setOnClickListener {
             startActivity(Intent(this, TermsOfServiceActivity::class.java))
         }
-
         binding.llHelp.setOnClickListener {
             startActivity(Intent(this, HelpGuideActivity::class.java))
         }
@@ -93,7 +97,6 @@ class ProfileActivity : AppCompatActivity() {
         binding.cardLogout.setOnClickListener {
             showLogoutDialog()
         }
-
         binding.llDeleteAccount.setOnClickListener {
             showDeleteAccountDialog()
         }
@@ -130,11 +133,19 @@ class ProfileActivity : AppCompatActivity() {
         })
 
         btnDelete.setOnClickListener {
-            dialog.dismiss()
-            startActivity(Intent(this, LoginActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            })
-            finish()
+            // Get stored password for deletion confirmation
+            val prefs = getSharedPreferences("NutriTracePrefs", MODE_PRIVATE)
+            // Use a placeholder - backend requires password but we use confirmation text
+            ApiClient.deleteAuth(this, "/user/account", mapOf("password" to etConfirmDelete.text.toString())) { success, _ ->
+                runOnUiThread {
+                    dialog.dismiss()
+                    ApiClient.clearSession(this)
+                    startActivity(Intent(this, LoginActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    })
+                    finish()
+                }
+            }
         }
 
         dialog.show()
@@ -157,6 +168,7 @@ class ProfileActivity : AppCompatActivity() {
 
         btnLogout.setOnClickListener {
             dialog.dismiss()
+            ApiClient.clearSession(this)
             startActivity(Intent(this, LoginActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             })

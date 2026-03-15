@@ -17,21 +17,40 @@ class NewPasswordActivity : AppCompatActivity() {
         binding = ActivityNewPasswordBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Set up click listener for Back button
+        val email = intent.getStringExtra("EMAIL") ?: ""
+        val resetToken = intent.getStringExtra("RESET_TOKEN") ?: ""
+
         binding.btnBack.setOnClickListener {
-            finish() // Navigates back to Verify OTP screen
+            finish()
         }
 
-        // Initially disable change password button
         binding.btnResetPassword.isEnabled = false
         binding.btnResetPassword.alpha = 0.5f
 
         setupValidations()
 
-        // Set up click listener for Reset Password button
         binding.btnResetPassword.setOnClickListener {
-            // Show Success Dialog
-            showSuccessDialog()
+            val newPassword = binding.etNewPassword.text.toString()
+            val confirmPassword = binding.etConfirmPassword.text.toString()
+
+            binding.btnResetPassword.isEnabled = false
+
+            ApiClient.post("/auth/reset-password", mapOf(
+                "email" to email,
+                "reset_token" to resetToken,
+                "new_password" to newPassword,
+                "confirm_password" to confirmPassword
+            )) { success, json ->
+                runOnUiThread {
+                    binding.btnResetPassword.isEnabled = true
+                    if (success && json?.get("success")?.asBoolean == true) {
+                        showSuccessDialog()
+                    } else {
+                        val message = json?.get("message")?.asString ?: "Password reset failed"
+                        android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
         }
     }
 
@@ -79,7 +98,7 @@ class NewPasswordActivity : AppCompatActivity() {
     private fun updateChecklistItem(textView: TextView, isValid: Boolean) {
         val color = if (isValid) ContextCompat.getColor(this, R.color.primary_green) else ContextCompat.getColor(this, android.R.color.holo_red_dark)
         val icon = if (isValid) ContextCompat.getDrawable(this, R.drawable.ic_check) else ContextCompat.getDrawable(this, R.drawable.ic_close)
-        
+
         textView.setTextColor(color)
         textView.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null)
         textView.compoundDrawableTintList = android.content.res.ColorStateList.valueOf(color)
@@ -109,12 +128,9 @@ class NewPasswordActivity : AppCompatActivity() {
             .setCancelable(false)
             .create()
 
-        // Make dialog background transparent so the rounded CardView shows properly
         dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
-
         dialog.show()
 
-        // Delay 2.5 seconds, then dismiss and navigate to Login
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
             if (dialog.isShowing) {
                 dialog.dismiss()

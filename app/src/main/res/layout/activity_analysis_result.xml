@@ -89,6 +89,7 @@
                         android:gravity="center">
 
                         <TextView
+                            android:id="@+id/tvScoreValue"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="65"
@@ -97,6 +98,7 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/tvScoreMax"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="/100"
@@ -195,9 +197,10 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/tvSugarValue"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="12g"
+                            android:text="--"
                             android:textColor="@color/home_text_title"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -237,9 +240,10 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/tvAdditivesValue"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="3"
+                            android:text="--"
                             android:textColor="@color/home_text_title"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -279,9 +283,10 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/tvAllergensValue"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="No"
+                            android:text="--"
                             android:textColor="@color/home_text_title"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -403,11 +408,12 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/tvOverviewText"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:lineSpacingExtra="6dp"
-                            android:text="This granola is moderately processed with whole grain oats as the base. The score of 65 reflects the presence of added sugars and artificial flavoring agents. Individuals monitoring their blood sugar or with sensitivities to artificial additives should consume this product sparingly."
+                            android:text=""
                             android:textColor="#475569"
                             android:textSize="14sp" />
                     </LinearLayout>
@@ -439,119 +445,15 @@
                         android:orientation="vertical" />
                 </LinearLayout>
 
-                <!-- 3. Risk Breakdown Layout -->
+                <!-- 3. Risk Breakdown Layout (dynamically populated) -->
                 <LinearLayout
                     android:id="@+id/llRiskBreakdown"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:visibility="gone">
+                    android:visibility="gone" />
 
-                    <!-- Risk Item: Sugar -->
-                    <androidx.cardview.widget.CardView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
-                        app:cardBackgroundColor="@color/white"
-                        app:cardCornerRadius="16dp"
-                        app:cardElevation="2dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:padding="20dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Sugar Analysis"
-                                android:textColor="@color/home_text_title"
-                                android:textSize="15sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="12dp"
-                                android:lineSpacingExtra="4dp"
-                                android:text="Contains 12g of sugar per serving, which represents approximately 24% of the recommended daily intake. Most of this comes from added cane sugar rather than naturally occurring sugars from oats or honey."
-                                android:textColor="#475569"
-                                android:textSize="13sp" />
-                        </LinearLayout>
-                    </androidx.cardview.widget.CardView>
-
-                    <!-- Risk Item: Processing -->
-                    <androidx.cardview.widget.CardView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
-                        app:cardBackgroundColor="@color/white"
-                        app:cardCornerRadius="16dp"
-                        app:cardElevation="2dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:padding="20dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Processing Level"
-                                android:textColor="@color/home_text_title"
-                                android:textSize="15sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="12dp"
-                                android:lineSpacingExtra="4dp"
-                                android:text="Moderate (NOVA Category 3). This product is classified as processed food containing industrial ingredients like refined oils and artificial flavors. Not ultra-processed, but contains more than minimally processed ingredients."
-                                android:textColor="#475569"
-                                android:textSize="13sp" />
-                        </LinearLayout>
-                    </androidx.cardview.widget.CardView>
-
-                    <!-- Risk Item: Additives -->
-                    <androidx.cardview.widget.CardView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
-                        app:cardBackgroundColor="@color/white"
-                        app:cardCornerRadius="16dp"
-                        app:cardElevation="2dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:padding="20dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Additive Load"
-                                android:textColor="@color/home_text_title"
-                                android:textSize="15sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="12dp"
-                                android:lineSpacingExtra="4dp"
-                                android:text="Contains 3 additives including artificial flavoring agents and processing aids. While within acceptable limits, sensitive individuals may experience reactions."
-                                android:textColor="#475569"
-                                android:textSize="13sp" />
-                        </LinearLayout>
-                    </androidx.cardview.widget.CardView>
-                    
-                </LinearLayout>
-
-                <!-- 4. Guidance Layout -->
+                <!-- 4. Guidance Layout (dynamically populated) -->
                 <androidx.cardview.widget.CardView
                     android:id="@+id/llGuidance"
                     android:layout_width="match_parent"
@@ -576,26 +478,11 @@
                             android:textStyle="bold"
                             android:layout_marginBottom="16dp" />
 
-                        <!-- Bullet Points -->
-                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="12dp">
-                            <View android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_choice_circle" android:backgroundTint="#94A3B8" android:layout_marginTop="6dp" android:layout_marginEnd="12dp" />
-                            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Choose granola options with less than 5g sugar per serving" android:textColor="#475569" android:textSize="14sp" />
-                        </LinearLayout>
-                        
-                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="12dp">
-                            <View android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_choice_circle" android:backgroundTint="#94A3B8" android:layout_marginTop="6dp" android:layout_marginEnd="12dp" />
-                            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Avoid products listing artificial flavors or colors" android:textColor="#475569" android:textSize="14sp" />
-                        </LinearLayout>
-
-                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="12dp">
-                            <View android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_choice_circle" android:backgroundTint="#94A3B8" android:layout_marginTop="6dp" android:layout_marginEnd="12dp" />
-                            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Prefer shorter ingredient lists with recognizable whole food items" android:textColor="#475569" android:textSize="14sp" />
-                        </LinearLayout>
-                        
-                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-                            <View android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_choice_circle" android:backgroundTint="#94A3B8" android:layout_marginTop="6dp" android:layout_marginEnd="12dp" />
-                            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Look for options sweetened with dates or minimal honey instead of refined sugar" android:textColor="#475569" android:textSize="14sp" />
-                        </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/llGuidanceList"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical" />
 
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>

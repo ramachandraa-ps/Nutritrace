@@ -1,72 +1,149 @@
 import mysql.connector
+from config import DB_HOST, DB_USER, DB_PASSWORD, DB_NAME
 
-DB_HOST = "localhost"
-DB_USER = "root"
-DB_PASSWORD = ""
-DB_NAME = "nutritrace_db"
 
-def get_db_connection(include_db=True):
-    """
-    Connects to the MySQL server.
-    If include_db is False, it connects without selecting a database 
-    so we can create it if it doesn't exist.
-    """
+def get_db_connection():
     try:
         connection = mysql.connector.connect(
             host=DB_HOST,
             user=DB_USER,
             password=DB_PASSWORD,
-            database=DB_NAME if include_db else None
+            database=DB_NAME
         )
         return connection
     except mysql.connector.Error as err:
         print(f"Database connection error: {err}")
         return None
 
+
 def init_db():
-    """
-    Creates the database and the users table if they do not exist.
-    """
-    # 1. Connect without selecting database to create it if needed
-    conn = get_db_connection(include_db=False)
-    if conn is None:
-        print("Failed to connect to MySQL server. Please ensure XAMPP MySQL is running.")
-        return
-        
-    cursor = conn.cursor()
+    # Step 1: Create database if not exists
     try:
-        # Create database if it does not exist
+        conn = mysql.connector.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD
+        )
+        cursor = conn.cursor()
         cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_NAME}")
-        print(f"Database '{DB_NAME}' checked/created successfully.")
+        cursor.close()
+        conn.close()
+        print(f"Database '{DB_NAME}' ready.")
     except mysql.connector.Error as err:
         print(f"Failed creating database: {err}")
-    finally:
-        cursor.close()
-        conn.close()
+        return
 
-    # 2. Connect with the new database selected to create tables
-    conn = get_db_connection(include_db=True)
+    # Step 2: Connect to database and create tables
+    conn = get_db_connection()
     if conn is None:
         return
-        
+
     cursor = conn.cursor()
-    # Create users table if it does not exist
-    create_table_query = """
-    CREATE TABLE IF NOT EXISTS users (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        fullname VARCHAR(255) NOT NULL,
-        phone VARCHAR(50) NOT NULL,
-        email VARCHAR(255) NOT NULL UNIQUE,
-        password VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-    """
+
+    # Create tables only if they don't exist
+    tables = [
+        """
+        CREATE TABLE IF NOT EXISTS users (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            fullname VARCHAR(255) NOT NULL,
+            phone VARCHAR(50) NOT NULL,
+            email VARCHAR(255) NOT NULL UNIQUE,
+            password_hash VARCHAR(255) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS health_profiles (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL UNIQUE,
+            age_group ENUM('Child', 'Teen', 'Adult', 'Senior') NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS user_health_conditions (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            condition_key VARCHAR(100) NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            UNIQUE(user_id, condition_key)
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS user_sensitivities (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            sensitivity VARCHAR(255) NOT NULL,
+            is_custom BOOLEAN DEFAULT FALSE,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            UNIQUE(user_id, sensitivity)
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS scans (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            product_name VARCHAR(255),
+            brand_name VARCHAR(255),
+            score INT NOT NULL,
+            risk_level ENUM('LOW', 'MODERATE', 'HIGH') NOT NULL,
+            image_path VARCHAR(500),
+            raw_ocr_text TEXT,
+            ai_analysis JSON,
+            scanned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS scan_ingredients (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            scan_id INT NOT NULL,
+            ingredient_name VARCHAR(255) NOT NULL,
+            status ENUM('SAFE', 'CAUTION', 'AVOID') NOT NULL,
+            reason TEXT,
+            FOREIGN KEY (scan_id) REFERENCES scans(id) ON DELETE CASCADE
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS comparisons (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            scan_id_a INT NOT NULL,
+            scan_id_b INT NOT NULL,
+            chosen_product ENUM('A', 'B') DEFAULT NULL,
+            ai_summary TEXT,
+            compared_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (scan_id_a) REFERENCES scans(id) ON DELETE CASCADE,
+            FOREIGN KEY (scan_id_b) REFERENCES scans(id) ON DELETE CASCADE
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS password_reset_otps (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            otp_code VARCHAR(255) NOT NULL,
+            expires_at TIMESTAMP NOT NULL,
+            is_used BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+        """
+    ]
+
+    for sql in tables:
+        cursor.execute(sql)
+
+    # Migration: fix otp_code column size if it was created with VARCHAR(6)
     try:
-        cursor.execute(create_table_query)
-        conn.commit()
-        print("Table 'users' checked/created successfully.")
-    except mysql.connector.Error as err:
-        print(f"Failed creating table: {err}")
-    finally:
-        cursor.close()
-        conn.close()
+        cursor.execute("ALTER TABLE password_reset_otps MODIFY otp_code VARCHAR(255) NOT NULL")
+    except Exception:
+        pass  # Already correct size or table just created
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+    print("All 8 tables ready.")
