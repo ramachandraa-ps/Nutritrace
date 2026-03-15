@@ -1,0 +1,629 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/home_bg"
+    android:orientation="vertical">
+
+    <!-- Top App Bar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/home_bg"
+        app:contentInsetStart="0dp">
+
+        <ImageView
+            android:id="@+id/ivBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:padding="12dp"
+            android:src="@drawable/ic_arrow_back"
+            app:tint="@color/home_text_title" />
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingBottom="40dp">
+
+            <!-- Header Section -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp">
+
+                <TextView
+                    android:id="@+id/tvProductName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:text="Crunchy Honey\nGranola"
+                    android:textColor="@color/home_text_title"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toStartOf="@id/ivEditName"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:id="@+id/ivEditName"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="16dp"
+                    android:padding="4dp"
+                    android:src="@android:drawable/ic_menu_edit"
+                    app:tint="@color/home_text_title"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:layout_constraintEnd_toStartOf="@id/cvScore"
+                    app:layout_constraintTop_toTopOf="@id/tvProductName"
+                    app:layout_constraintBottom_toBottomOf="@id/tvProductName" />
+
+                <!-- Score Badge -->
+                <FrameLayout
+                    android:id="@+id/cvScore"
+                    android:layout_width="80dp"
+                    android:layout_height="70dp"
+                    android:background="@drawable/bg_score_badge"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="65"
+                            android:textColor="#E67E22"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="/100"
+                            android:textColor="#D68910"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tvRiskSubtitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:text="Moderate risk due to added sugars and artificial flavors."
+                    android:textColor="@color/home_text_sub"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toStartOf="@id/cvScore"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/etBrandName" />
+
+                <!-- Brand Name Input -->
+                <EditText
+                    android:id="@+id/etBrandName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@null"
+                    android:hint="Add Brand Name"
+                    android:textColor="@color/home_text_title"
+                    android:textColorHint="@color/home_text_sub"
+                    android:textSize="14sp"
+                    android:inputType="textCapWords"
+                    android:paddingBottom="4dp"
+                    android:backgroundTint="@color/home_text_sub"
+                    android:backgroundTintMode="src_in"
+                    android:textCursorDrawable="@null"
+                    app:layout_constraintEnd_toStartOf="@id/cvScore"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvProductName" />
+
+                <!-- Manual underline for better control -->
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:background="#CBD5E1"
+                    app:layout_constraintTop_toBottomOf="@id/etBrandName"
+                    app:layout_constraintStart_toStartOf="@id/etBrandName"
+                    app:layout_constraintEnd_toEndOf="@id/etBrandName" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Thumbnail Image (Below Header Text, Above Cards) -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cvThumbnail"
+                android:layout_width="60dp"
+                android:layout_height="80dp"
+                android:layout_marginTop="16dp"
+                android:visibility="gone"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp">
+
+                <ImageView
+                    android:id="@+id/ivThumbnailImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/bg_splash_logo_square" />
+            </androidx.cardview.widget.CardView>
+
+            <!-- Stat Cards Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:baselineAligned="false"
+                android:orientation="horizontal"
+                android:weightSum="3">
+
+                <!-- Sugar Card -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="0dp"
+                    android:layout_height="100dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="12g"
+                            android:textColor="@color/home_text_title"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="SUGAR"
+                            android:textColor="@color/home_text_sub"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.1" />
+
+                        <View
+                            android:layout_width="32dp"
+                            android:layout_height="3dp"
+                            android:layout_marginTop="8dp"
+                            android:background="#FACC15" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Additives Card -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="0dp"
+                    android:layout_height="100dp"
+                    android:layout_marginHorizontal="8dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="3"
+                            android:textColor="@color/home_text_title"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="ADDITIVES"
+                            android:textColor="@color/home_text_sub"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.1" />
+
+                        <View
+                            android:layout_width="32dp"
+                            android:layout_height="3dp"
+                            android:layout_marginTop="8dp"
+                            android:background="#C084FC" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Allergens Card -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="0dp"
+                    android:layout_height="100dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="No"
+                            android:textColor="@color/home_text_title"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="ALLERGENS"
+                            android:textColor="@color/home_text_sub"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.1" />
+
+                        <View
+                            android:layout_width="32dp"
+                            android:layout_height="3dp"
+                            android:layout_marginTop="8dp"
+                            android:background="#F87171" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+
+            <!-- Horizontal Tabs -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingVertical="4dp">
+
+                    <TextView
+                        android:id="@+id/tabOverview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_tab_selected"
+                        android:paddingHorizontal="20dp"
+                        android:paddingVertical="8dp"
+                        android:text="Overview"
+                        android:textColor="@color/home_text_title"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tabIngredients"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:background="@android:color/transparent"
+                        android:paddingHorizontal="20dp"
+                        android:paddingVertical="8dp"
+                        android:text="Ingredients"
+                        android:textColor="@color/home_text_sub"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tabRisk"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:background="@android:color/transparent"
+                        android:paddingHorizontal="20dp"
+                        android:paddingVertical="8dp"
+                        android:text="Risk Breakdown"
+                        android:textColor="@color/home_text_sub"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tabGuidance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:background="@android:color/transparent"
+                        android:paddingHorizontal="20dp"
+                        android:paddingVertical="8dp"
+                        android:text="Guidance"
+                        android:textColor="@color/home_text_sub"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- Dynamic Content Area -->
+            <FrameLayout
+                android:id="@+id/flContentContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp">
+
+                <!-- 1. Overview Layout -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/llOverview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    android:visibility="visible">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Analysis Summary"
+                            android:textColor="@color/home_text_title"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:lineSpacingExtra="6dp"
+                            android:text="This granola is moderately processed with whole grain oats as the base. The score of 65 reflects the presence of added sugars and artificial flavoring agents. Individuals monitoring their blood sugar or with sensitivities to artificial additives should consume this product sparingly."
+                            android:textColor="#475569"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- 2. Ingredients Layout -->
+                <LinearLayout
+                    android:id="@+id/llIngredients"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="INGREDIENT BREAKDOWN"
+                        android:textColor="#94A3B8"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.05"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Ingredient Items will be added dynamically or statically here -->
+                    <LinearLayout
+                        android:id="@+id/llIngredientList"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+                </LinearLayout>
+
+                <!-- 3. Risk Breakdown Layout -->
+                <LinearLayout
+                    android:id="@+id/llRiskBreakdown"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <!-- Risk Item: Sugar -->
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        app:cardBackgroundColor="@color/white"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="2dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="20dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Sugar Analysis"
+                                android:textColor="@color/home_text_title"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="12dp"
+                                android:lineSpacingExtra="4dp"
+                                android:text="Contains 12g of sugar per serving, which represents approximately 24% of the recommended daily intake. Most of this comes from added cane sugar rather than naturally occurring sugars from oats or honey."
+                                android:textColor="#475569"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Risk Item: Processing -->
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        app:cardBackgroundColor="@color/white"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="2dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="20dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Processing Level"
+                                android:textColor="@color/home_text_title"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="12dp"
+                                android:lineSpacingExtra="4dp"
+                                android:text="Moderate (NOVA Category 3). This product is classified as processed food containing industrial ingredients like refined oils and artificial flavors. Not ultra-processed, but contains more than minimally processed ingredients."
+                                android:textColor="#475569"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Risk Item: Additives -->
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        app:cardBackgroundColor="@color/white"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="2dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="20dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Additive Load"
+                                android:textColor="@color/home_text_title"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="12dp"
+                                android:lineSpacingExtra="4dp"
+                                android:text="Contains 3 additives including artificial flavoring agents and processing aids. While within acceptable limits, sensitive individuals may experience reactions."
+                                android:textColor="#475569"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+                    
+                </LinearLayout>
+
+                <!-- 4. Guidance Layout -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/llGuidance"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="How to Make a Better Choice"
+                            android:textColor="@color/home_text_title"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="16dp" />
+
+                        <!-- Bullet Points -->
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="12dp">
+                            <View android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_choice_circle" android:backgroundTint="#94A3B8" android:layout_marginTop="6dp" android:layout_marginEnd="12dp" />
+                            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Choose granola options with less than 5g sugar per serving" android:textColor="#475569" android:textSize="14sp" />
+                        </LinearLayout>
+                        
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="12dp">
+                            <View android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_choice_circle" android:backgroundTint="#94A3B8" android:layout_marginTop="6dp" android:layout_marginEnd="12dp" />
+                            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Avoid products listing artificial flavors or colors" android:textColor="#475569" android:textSize="14sp" />
+                        </LinearLayout>
+
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="12dp">
+                            <View android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_choice_circle" android:backgroundTint="#94A3B8" android:layout_marginTop="6dp" android:layout_marginEnd="12dp" />
+                            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Prefer shorter ingredient lists with recognizable whole food items" android:textColor="#475569" android:textSize="14sp" />
+                        </LinearLayout>
+                        
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                            <View android:layout_width="6dp" android:layout_height="6dp" android:background="@drawable/bg_choice_circle" android:backgroundTint="#94A3B8" android:layout_marginTop="6dp" android:layout_marginEnd="12dp" />
+                            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Look for options sweetened with dates or minimal honey instead of refined sugar" android:textColor="#475569" android:textSize="14sp" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+            </FrameLayout>
+
+            <!-- Save Scan Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSaveScan"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="32dp"
+                android:backgroundTint="@color/button_dark"
+                android:letterSpacing="0.05"
+                android:text="Save Scan"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="12dp" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Navigation Spacer / Safe Area -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="24dp"
+        android:background="@color/home_bg" />
+
+</LinearLayout>

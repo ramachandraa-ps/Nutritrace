@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FAF9FB"
+    android:orientation="vertical">
+
+    <!-- Top Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:padding="2dp"
+            android:src="@drawable/ic_arrow_back"
+            app:tint="@color/text_gray" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:letterSpacing="0.1"
+            android:text="STEP 3 OF 3"
+            android:textAlignment="center"
+            android:textColor="@color/text_gray"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="24dp"
+            android:layout_height="24dp" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:progress="100"
+        android:progressBackgroundTint="#E0E0E0"
+        android:progressTint="@color/primary_green" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Specific Ingredient Sensitivities"
+                android:textColor="@color/text_dark"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="24dp"
+                android:text="Select if you have known ingredient intolerances."
+                android:textColor="@color/text_gray"
+                android:textSize="14sp" />
+
+            <!-- Chips for predefined options -->
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/cgSensitivities"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:chipSpacingHorizontal="8dp"
+                app:chipSpacingVertical="8dp">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipDairy"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dairy"
+                    android:textColor="@color/text_dark"
+                    app:chipBackgroundColor="@color/white"
+                    app:chipStrokeColor="#E0E0E0"
+                    app:chipStrokeWidth="1dp" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipNuts"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nuts"
+                    android:textColor="@color/text_dark"
+                    app:chipBackgroundColor="@color/white"
+                    app:chipStrokeColor="#E0E0E0"
+                    app:chipStrokeWidth="1dp" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipGluten"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Gluten"
+                    android:textColor="@color/text_dark"
+                    app:chipBackgroundColor="@color/white"
+                    app:chipStrokeColor="#E0E0E0"
+                    app:chipStrokeWidth="1dp" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipSulfites"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sulfites"
+                    android:textColor="@color/text_dark"
+                    app:chipBackgroundColor="@color/white"
+                    app:chipStrokeColor="#E0E0E0"
+                    app:chipStrokeWidth="1dp" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipArtificialColors"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Artificial Colors"
+                    android:textColor="@color/text_dark"
+                    app:chipBackgroundColor="@color/white"
+                    app:chipStrokeColor="#E0E0E0"
+                    app:chipStrokeWidth="1dp" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipArtificialSweet"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Artificial Sweeteners"
+                    android:textColor="@color/text_dark"
+                    app:chipBackgroundColor="@color/white"
+                    app:chipStrokeColor="#E0E0E0"
+                    app:chipStrokeWidth="1dp" />
+
+                <!-- The requested None option -->
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipNone"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="None"
+                    android:textColor="@color/text_dark"
+                    app:chipBackgroundColor="@color/white"
+                    app:chipStrokeColor="#E0E0E0"
+                    app:chipStrokeWidth="1dp" />
+
+            </com.google.android.material.chip.ChipGroup>
+
+            <!-- Add Custom Sensitivity Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAddCustom"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="32dp"
+                android:text="+ Add Custom Sensitivity"
+                android:textAllCaps="false"
+                android:textColor="@color/text_dark"
+                android:textSize="16sp"
+                app:cornerRadius="12dp"
+                app:strokeColor="#C0C0C0"
+                app:strokeWidth="1dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnFinish"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:backgroundTint="@color/primary_green"
+                android:text="Finish Setup"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="12dp"
+                app:icon="@drawable/ic_arrow_forward"
+                app:iconGravity="textEnd" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
+

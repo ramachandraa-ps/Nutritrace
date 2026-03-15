@@ -1,0 +1,7 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <stroke
+        android:width="2dp"
+        android:color="@color/splash_ring_color" /> <!-- Dark mint green -->
+    <solid android:color="#00000000" />
+</shape>

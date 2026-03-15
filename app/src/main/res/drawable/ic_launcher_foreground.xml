@@ -1,0 +1,45 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Leaf -->
+    <!-- Leaf paths -->
+    <path
+        android:strokeColor="#16B88A"
+        android:strokeWidth="9.0"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M 38.25,78.75 C 13.5,63 27,24.75 74.25,20.25 C 87.75,27 87.75,49.5 76.5,58.5" />
+    <path
+        android:strokeColor="#16B88A"
+        android:strokeWidth="9.0"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M 58.5,76.5 C 49.5,78.75 42.75,78.75 38.25,78.75 L 31.5,94.5" />
+    <path
+        android:strokeColor="#16B88A"
+        android:strokeWidth="9.0"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M 38.25,78.75 C 49.5,69.75 58.5,63 63,58.5" />
+
+    <!-- Badge Background -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 72,63 L 94.5,63 A 11.25,11.25 0 0 1 105.75,74.25 L 105.75,92.25 A 11.25,11.25 0 0 1 94.5,103.5 L 72,103.5 A 11.25,11.25 0 0 1 60.75,92.25 L 60.75,74.25 A 11.25,11.25 0 0 1 72,63 Z" />
+
+    <!-- Badge Brackets -->
+    <path
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="6.75"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M 78.75,72 L 72,72 L 72,78.75 M 87.75,72 L 94.5,72 L 94.5,78.75 M 72,87.75 L 72,94.5 L 78.75,94.5 M 94.5,87.75 L 94.5,94.5 L 87.75,94.5" />
+
+</vector>

@@ -1,0 +1,10 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24.0"
+    android:viewportHeight="24.0"
+    android:tint="#00E5FF">
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M19,10h-3.41l-2.08,-6.25c-0.22,-0.66 -1.21,-0.64 -1.41,0.03l-3.35,11.16 -1.89,-3.78C6.67,10.78 6.35,10.5 6,10.5H3v2h2.2l2.67,5.34C8.07,18.23 8.39,18.5 8.76,18.49c0.37,0 0.69,-0.27 0.77,-0.63l3.35,-11.16 2.06,6.17c0.2,0.6 0.99,0.78 1.45,0.32L17.8,12H19v-2z"/> <!-- Pulse/Monitor icon -->
+</vector>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black">
+
+    <!-- CameraX Preview -->
+    <androidx.camera.view.PreviewView
+        android:id="@+id/viewFinder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Top Bar -->
+    <ImageView
+        android:id="@+id/ivClose"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="48dp"
+        android:background="@drawable/bg_circle_dark"
+        android:padding="8dp"
+        android:src="@drawable/ic_close_white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_circle_dark"
+        android:paddingHorizontal="24dp"
+        android:paddingVertical="10dp"
+        android:text="SCAN INGREDIENTS"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/ivClose"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/ivClose" />
+
+    <!-- Center Scan Frame -->
+    <View
+        android:id="@+id/vScanFrame"
+        android:layout_width="0dp"
+        android:layout_height="320dp"
+        android:layout_marginHorizontal="40dp"
+        android:layout_marginTop="80dp"
+        android:background="@drawable/bg_scan_frame"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ivClose" />
+
+    <!-- Instruction Text -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Position ingredients within the frame"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/vScanFrame" />
+
+    <!-- Bottom Controls Container -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_sheet_rounded_top"
+        android:paddingHorizontal="32dp"
+        android:paddingVertical="40dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- Gallery Button -->
+        <ImageView
+            android:id="@+id/ivGallery"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="@drawable/bg_icon_gray_rounded"
+            android:padding="16dp"
+            android:src="@drawable/ic_gallery_dark"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Capture Button -->
+        <View
+            android:id="@+id/btnCapture"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="@drawable/bg_splash_ring_precise"
+            android:backgroundTint="#16B88A"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@drawable/bg_scan_circle"
+            app:layout_constraintBottom_toBottomOf="@id/btnCapture"
+            app:layout_constraintEnd_toEndOf="@id/btnCapture"
+            app:layout_constraintStart_toStartOf="@id/btnCapture"
+            app:layout_constraintTop_toTopOf="@id/btnCapture" />
+
+        <!-- Flash Button -->
+        <ImageView
+            android:id="@+id/ivFlash"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="@drawable/bg_icon_gray_rounded"
+            android:padding="16dp"
+            android:src="@drawable/ic_flash_auto"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

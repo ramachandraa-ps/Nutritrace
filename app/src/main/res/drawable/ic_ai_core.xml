@@ -1,0 +1,10 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24.0"
+    android:viewportHeight="24.0"
+    android:tint="#00E5FF">
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M2.5,13.5l3.86,-10.8A0.5,0.5 0,0 1,6.83 2.5h10.34a0.5,0.5 0,0 1,0.47 0.2l3.86,10.8A1,1 0,0 1,21 14v5a1,1 0,0 1,-1 1H4a1,1 0,0 1,-1,-1v-5A1,1 0,0 1,2.5 13.5zM12,4.5a3.5,3.5 0,1 0,0 7, 3.5,3.5 0,0 0,0,-7zM10,8h4v1h-4V8z"/> <!-- Simplified AI Psychology icon approximation -->
+</vector>

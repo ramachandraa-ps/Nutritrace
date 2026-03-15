@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-feature android:name="android.hardware.camera.any" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
+        android:theme="@style/Theme.Nutritrace">
+        <activity
+            android:name=".SplashActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Nutritrace">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Nutritrace" />
+        <activity
+            android:name=".ForgotPasswordActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Nutritrace" />
+        <activity
+            android:name=".VerifyOtpActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Nutritrace" />
+        <activity
+            android:name=".NewPasswordActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Nutritrace" />
+        <activity
+            android:name=".HomeActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Nutritrace" />
+        <activity
+            android:name=".CompareActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Nutritrace" />
+        <activity
+            android:name=".ScanIngredientsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Nutritrace" />
+        <activity
+            android:name=".ReviewImageActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Nutritrace" />
+        <activity
+            android:name=".AnalyzingActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Nutritrace" />
+        <activity
+            android:name=".AnalysisResultActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Nutritrace" />
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Nutritrace" />
+        <activity
+            android:name=".AgeSelectionActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Nutritrace" />
+        <activity
+            android:name=".HealthSelectionActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Nutritrace" />
+        <activity
+            android:name=".SensitivitySelectionActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Nutritrace" />
+        <activity
+            android:name=".AddCustomSensitivityActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Nutritrace" />
+        <activity
+            android:name=".ProfileSuccessActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Nutritrace" />
+        <activity
+            android:name=".ScanHistoryActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Nutritrace" />
+        <activity
+            android:name=".ProfileActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".PersonalDetailsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ChangePasswordActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".PrivacyPolicyActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".TermsOfServiceActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".HelpGuideActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+    </application>
+
+</manifest>

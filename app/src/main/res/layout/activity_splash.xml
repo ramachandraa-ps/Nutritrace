@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/splash_dark_bg">
+
+    <!-- Faux Particles using tiny views perfectly mapped to the image proportions -->
+    <!-- Top Right Particle -->
+    <View
+        android:layout_width="4dp"
+        android:layout_height="4dp"
+        android:layout_marginTop="80dp"
+        android:layout_marginEnd="80dp"
+        android:background="@drawable/bg_splash_particle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Center Left Particle -->
+    <View
+        android:layout_width="4dp"
+        android:layout_height="4dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="300dp"
+        android:background="@drawable/bg_splash_particle"
+        android:alpha="0.8"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Center Left Particle 2 (Lower) -->
+    <View
+        android:layout_width="4dp"
+        android:layout_height="4dp"
+        android:layout_marginStart="140dp"
+        android:layout_marginTop="560dp"
+        android:background="@drawable/bg_splash_particle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Bottom Center Particle -->
+    <View
+        android:layout_width="3dp"
+        android:layout_height="3dp"
+        android:layout_marginTop="720dp"
+        android:layout_marginEnd="60dp"
+        android:background="@drawable/bg_splash_particle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Bottom Left Particle -->
+    <View
+        android:layout_width="4dp"
+        android:layout_height="4dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginBottom="60dp"
+        android:background="@drawable/bg_splash_particle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Bottom Right Middle Particle -->
+    <View
+        android:layout_width="3dp"
+        android:layout_height="3dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="120dp"
+        android:background="@drawable/bg_splash_particle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Bottom Right Deep Particle -->
+    <View
+        android:layout_width="2dp"
+        android:layout_height="2dp"
+        android:layout_marginEnd="80dp"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/bg_splash_particle"
+        android:alpha="0.5"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Center Logo Container -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/logoContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/tvNutritrace"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed">
+
+        <!-- Outer Ring (Faint glow structure) -->
+        <!-- Image shows two glowing rings, one slightly larger than the other -->
+        <View
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            android:background="@drawable/bg_splash_ring_precise"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:layout_width="144dp"
+            android:layout_height="144dp"
+            android:background="@drawable/bg_splash_ring_precise"
+            android:alpha="0.6"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Inner Dark Square -->
+        <View
+            android:id="@+id/logoSquare"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:background="@drawable/bg_splash_logo_square_precise"
+            android:layout_margin="32dp"
+            android:elevation="12dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Precise Icon -->
+        <ImageView
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:src="@drawable/ic_eco_scan_precise"
+            android:elevation="16dp"
+            app:layout_constraintBottom_toBottomOf="@id/logoSquare"
+            app:layout_constraintEnd_toEndOf="@id/logoSquare"
+            app:layout_constraintStart_toStartOf="@id/logoSquare"
+            app:layout_constraintTop_toTopOf="@id/logoSquare" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- App Name with dual colors -->
+    <!-- Important: The layout uses specific text sizing and bolding -->
+    <LinearLayout
+        android:id="@+id/tvNutritrace"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/tvSubtitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/logoContainer">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nutri"
+            android:textColor="@color/splash_neon_green"
+            android:textSize="40sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Trace"
+            android:textColor="@color/splash_cyan"
+            android:textSize="40sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Subtitle -->
+    <TextView
+        android:id="@+id/tvSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:letterSpacing="0.3"
+        android:text="PURITY • SAFETY • TRUST"
+        android:textColor="@color/splash_text_gray"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/bottomSection"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvNutritrace" />
+
+    <!-- Bottom Section -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottomSection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="64dp"
+        android:paddingHorizontal="40dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <!-- Progress Header -->
+        <TextView
+            android:id="@+id/tvSystemCheck"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SYSTEM CHECK"
+            android:textColor="@color/splash_neon_green"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvActive"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ACTIVE"
+            android:textColor="@color/splash_icon_color"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Progress Bar Background track -->
+        <FrameLayout
+            android:id="@+id/progressTrack"
+            android:layout_width="match_parent"
+            android:layout_height="6dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_splash_progress_track"
+            app:layout_constraintTop_toBottomOf="@id/tvSystemCheck">
+
+            <!-- Filled progress (Will be animated in Kotlin) -->
+            <View
+                android:id="@+id/progressView"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_splash_progress_fill" />
+        </FrameLayout>
+
+        <!-- Icons at the bottom -->
+        <!-- Placed closer together like the image -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:baselineAligned="false"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:weightSum="3"
+            app:layout_constraintTop_toBottomOf="@id/progressTrack">
+
+            <!-- AI Core -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <!-- Using pure tint without opacity for sharper effect like image -->
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/ic_ai_core"
+                    app:tint="@color/splash_cyan" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="AI CORE"
+                    android:textColor="@color/splash_text_gray"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Secure -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/ic_secure"
+                    app:tint="@color/splash_neon_green" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="SECURE"
+                    android:textColor="@color/splash_text_gray"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Real-Time -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/ic_monitor"
+                    app:tint="@color/splash_cyan" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="REAL-TIME"
+                    android:textColor="@color/splash_text_gray"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
