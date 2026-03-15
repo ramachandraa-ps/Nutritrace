@@ -42,14 +42,29 @@ class PersonalDetailsActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // Load profile from backend
+        // Show cached user info immediately
+        val prefs = getSharedPreferences("NutriTracePrefs", MODE_PRIVATE)
+        val cachedName = prefs.getString("USER_FULLNAME", null)
+        val cachedEmail = prefs.getString("USER_EMAIL", null)
+        val cachedPhone = prefs.getString("USER_PHONE", null)
+        if (!cachedName.isNullOrEmpty()) binding.etFullName.setText(cachedName)
+        if (!cachedPhone.isNullOrEmpty()) binding.etPhone.setText(cachedPhone)
+        if (!cachedEmail.isNullOrEmpty()) binding.etEmail.setText(cachedEmail)
+
+        // Then fetch fresh data from backend
         ApiClient.getAuth(this, "/user/profile") { success, json ->
             runOnUiThread {
                 if (success && json?.get("success")?.asBoolean == true) {
                     val user = json.getAsJsonObject("user")
-                    binding.etFullName.setText(user.get("fullname")?.asString ?: "")
-                    binding.etPhone.setText(user.get("phone")?.asString ?: "")
-                    binding.etEmail.setText(user.get("email")?.asString ?: "")
+                    val freshName = user.get("fullname")?.asString ?: ""
+                    val freshPhone = user.get("phone")?.asString ?: ""
+                    val freshEmail = user.get("email")?.asString ?: ""
+                    binding.etFullName.setText(freshName)
+                    binding.etPhone.setText(freshPhone)
+                    binding.etEmail.setText(freshEmail)
+
+                    // Update SharedPreferences with fresh data
+                    ApiClient.saveUserInfo(this, prefs.getInt("USER_ID", 0), freshName, freshEmail, freshPhone)
                 }
             }
         }
@@ -83,6 +98,15 @@ class PersonalDetailsActivity : AppCompatActivity() {
                 }
 
                 if (success && json?.get("success")?.asBoolean == true) {
+                    // Update SharedPreferences with saved data
+                    val prefs = getSharedPreferences("NutriTracePrefs", MODE_PRIVATE)
+                    ApiClient.saveUserInfo(
+                        this,
+                        prefs.getInt("USER_ID", 0),
+                        binding.etFullName.text.toString().trim(),
+                        binding.etEmail.text.toString().trim(),
+                        binding.etPhone.text.toString().trim()
+                    )
                     Toast.makeText(this, "Changes saved successfully", Toast.LENGTH_SHORT).show()
                 } else {
                     val message = json?.get("message")?.asString ?: "Failed to save changes"

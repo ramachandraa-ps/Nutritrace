@@ -6,6 +6,8 @@ import com.google.gson.JsonObject
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
+import android.graphics.BitmapFactory
+import android.widget.ImageView
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit
@@ -14,7 +16,11 @@ object ApiClient {
     // CHANGE THIS to your computer's local IP address (run ipconfig in terminal)
     private const val BASE_URL = "http://10.199.143.6:5000"
 
-    private val client = OkHttpClient()
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(120, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .build()
 
     // Longer timeout for image upload + OCR + AI analysis (can take 20-30 seconds)
     private val uploadClient = OkHttpClient.Builder()
@@ -49,6 +55,41 @@ object ApiClient {
     fun clearSession(context: Context) {
         context.getSharedPreferences("NutriTracePrefs", Context.MODE_PRIVATE)
             .edit().clear().apply()
+        context.getSharedPreferences("NutriTraceCache", Context.MODE_PRIVATE)
+            .edit().clear().apply()
+    }
+
+    fun cacheData(context: Context, key: String, json: String) {
+        context.getSharedPreferences("NutriTraceCache", Context.MODE_PRIVATE)
+            .edit().putString(key, json).apply()
+    }
+
+    fun getCachedData(context: Context, key: String): JsonObject? {
+        val cached = context.getSharedPreferences("NutriTraceCache", Context.MODE_PRIVATE)
+            .getString(key, null) ?: return null
+        return try { Gson().fromJson(cached, JsonObject::class.java) } catch (e: Exception) { null }
+    }
+
+    fun getImageUrl(imagePath: String?): String? {
+        if (imagePath.isNullOrBlank()) return null
+        return "$BASE_URL/uploads/$imagePath"
+    }
+
+    fun loadImage(imageView: ImageView, imagePath: String?) {
+        val url = getImageUrl(imagePath) ?: return
+        val request = Request.Builder().url(url).get().build()
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {}
+            override fun onResponse(call: Call, response: Response) {
+                val bytes = response.body?.bytes() ?: return
+                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size) ?: return
+                imageView.post {
+                    imageView.setPadding(0, 0, 0, 0)
+                    imageView.scaleType = ImageView.ScaleType.CENTER_CROP
+                    imageView.setImageBitmap(bitmap)
+                }
+            }
+        })
     }
 
     // POST JSON (no auth)

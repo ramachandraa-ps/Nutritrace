@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@color/white"
+    android:fitsSystemWindows="true">
 
     <!-- Scrollable Content -->
     <ScrollView
@@ -366,6 +367,43 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </LinearLayout>
 
+            <!-- Loading State (Hidden by default) -->
+            <LinearLayout
+                android:id="@+id/llLoadingState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:visibility="gone"
+                android:layout_marginTop="24dp"
+                android:padding="32dp"
+                app:layout_constraintTop_toBottomOf="@id/llCards">
+
+                <ProgressBar
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:indeterminateTint="@color/home_card_start" />
+
+                <TextView
+                    android:id="@+id/tvLoadingTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Analyzing Products..."
+                    android:textColor="@color/home_text_title"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvLoadingSubtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Scanning product A ingredients..."
+                    android:textColor="@color/home_text_sub"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
             <!-- Comparison Results Layout (Hidden by default) -->
             <LinearLayout
                 android:id="@+id/llComparisonResults"
@@ -389,7 +427,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical">
-                        
+
                         <ImageView
                             android:layout_width="28dp"
                             android:layout_height="28dp"
@@ -397,13 +435,14 @@
                             android:background="@drawable/bg_icon_green_rounded"
                             android:padding="6dp"
                             app:tint="@color/white" />
-                        
+
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
                             android:layout_marginStart="12dp">
                             <TextView
+                                android:id="@+id/tvRecommendationTitle"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="AI Recommendation"
@@ -420,6 +459,7 @@
                     </LinearLayout>
 
                     <TextView
+                        android:id="@+id/tvRecommendationSummary"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
@@ -467,23 +507,25 @@
                             android:layout_marginBottom="16dp"
                             android:baselineAligned="false">
                             <TextView
+                                android:id="@+id/tvScoreA"
                                 android:layout_width="0dp"
                                 android:layout_weight="1"
                                 android:layout_height="wrap_content"
                                 android:background="@drawable/bg_pill_green_light"
                                 android:padding="8dp"
-                                android:text="85%"
+                                android:text="--"
                                 android:textColor="@color/home_status_low"
                                 android:textStyle="bold"
                                 android:textSize="13sp"
                                 android:layout_marginEnd="6dp" />
                             <TextView
+                                android:id="@+id/tvScoreB"
                                 android:layout_width="0dp"
                                 android:layout_weight="1"
                                 android:layout_height="wrap_content"
                                 android:background="@drawable/bg_pill_white_border"
                                 android:padding="8dp"
-                                android:text="45%"
+                                android:text="--"
                                 android:textColor="@color/home_text_title"
                                 android:textStyle="bold"
                                 android:textSize="13sp"
@@ -506,34 +548,36 @@
                             android:layout_marginBottom="16dp"
                             android:baselineAligned="false">
                             <TextView
+                                android:id="@+id/tvRiskA"
                                 android:layout_width="0dp"
                                 android:layout_weight="1"
                                 android:layout_height="wrap_content"
                                 android:background="@drawable/bg_pill_green_light"
                                 android:padding="8dp"
-                                android:text="Low"
+                                android:text="--"
                                 android:textColor="@color/home_status_low"
                                 android:textStyle="bold"
                                 android:textSize="13sp"
                                 android:layout_marginEnd="6dp" />
                             <TextView
+                                android:id="@+id/tvRiskB"
                                 android:layout_width="0dp"
                                 android:layout_weight="1"
                                 android:layout_height="wrap_content"
                                 android:background="@drawable/bg_pill_white_border"
                                 android:padding="8dp"
-                                android:text="High"
+                                android:text="--"
                                 android:textColor="@color/home_text_title"
                                 android:textStyle="bold"
                                 android:textSize="13sp"
                                 android:layout_marginStart="6dp" />
                         </LinearLayout>
 
-                        <!-- Ingredients Count Row -->
+                        <!-- Product Name Row -->
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="INGREDIENTS COUNT"
+                            android:text="PRODUCT NAME"
                             android:textSize="10sp"
                             android:textColor="@color/home_text_sub"
                             android:textStyle="bold"
@@ -545,34 +589,40 @@
                             android:layout_marginBottom="16dp"
                             android:baselineAligned="false">
                             <TextView
+                                android:id="@+id/tvNameA"
                                 android:layout_width="0dp"
                                 android:layout_weight="1"
                                 android:layout_height="wrap_content"
                                 android:background="@drawable/bg_pill_green_light"
                                 android:padding="8dp"
-                                android:text="5 Items"
+                                android:text="--"
                                 android:textColor="@color/home_status_low"
                                 android:textStyle="bold"
                                 android:textSize="13sp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
                                 android:layout_marginEnd="6dp" />
                             <TextView
+                                android:id="@+id/tvNameB"
                                 android:layout_width="0dp"
                                 android:layout_weight="1"
                                 android:layout_height="wrap_content"
                                 android:background="@drawable/bg_pill_white_border"
                                 android:padding="8dp"
-                                android:text="15 Items"
+                                android:text="--"
                                 android:textColor="@color/home_text_title"
                                 android:textStyle="bold"
                                 android:textSize="13sp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
                                 android:layout_marginStart="6dp" />
                         </LinearLayout>
 
-                        <!-- Additives Row -->
+                        <!-- Brand Row -->
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="ADDITIVES"
+                            android:text="BRAND"
                             android:textSize="10sp"
                             android:textColor="@color/home_text_sub"
                             android:textStyle="bold"
@@ -584,106 +634,54 @@
                             android:layout_marginBottom="16dp"
                             android:baselineAligned="false">
                             <TextView
+                                android:id="@+id/tvBrandA"
                                 android:layout_width="0dp"
                                 android:layout_weight="1"
                                 android:layout_height="wrap_content"
                                 android:background="@drawable/bg_pill_green_light"
                                 android:padding="8dp"
-                                android:text="0 Found"
+                                android:text="--"
                                 android:textColor="@color/home_status_low"
                                 android:textStyle="bold"
                                 android:textSize="13sp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
                                 android:layout_marginEnd="6dp" />
                             <TextView
+                                android:id="@+id/tvBrandB"
                                 android:layout_width="0dp"
                                 android:layout_weight="1"
                                 android:layout_height="wrap_content"
                                 android:background="@drawable/bg_pill_white_border"
                                 android:padding="8dp"
-                                android:text="4 Found"
+                                android:text="--"
                                 android:textColor="@color/home_text_title"
                                 android:textStyle="bold"
                                 android:textSize="13sp"
+                                android:maxLines="2"
+                                android:ellipsize="end"
                                 android:layout_marginStart="6dp" />
                         </LinearLayout>
 
-                        <!-- Processing Level Row -->
+                        <!-- AI Summary Row -->
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="PROCESSING LEVEL"
+                            android:text="AI ANALYSIS SUMMARY"
                             android:textSize="10sp"
                             android:textColor="@color/home_text_sub"
                             android:textStyle="bold"
                             android:layout_marginBottom="4dp" />
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:layout_marginBottom="16dp"
-                            android:baselineAligned="false">
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_weight="1"
-                                android:layout_height="wrap_content"
-                                android:background="@drawable/bg_pill_green_light"
-                                android:padding="8dp"
-                                android:text="Minimal"
-                                android:textColor="@color/home_status_low"
-                                android:textStyle="bold"
-                                android:textSize="13sp"
-                                android:layout_marginEnd="6dp" />
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_weight="1"
-                                android:layout_height="wrap_content"
-                                android:background="@drawable/bg_pill_white_border"
-                                android:padding="8dp"
-                                android:text="Ultra-Processed"
-                                android:textColor="@color/home_text_title"
-                                android:textStyle="bold"
-                                android:textSize="13sp"
-                                android:layout_marginStart="6dp" />
-                        </LinearLayout>
-
-                        <!-- Nutrition Score Row -->
                         <TextView
+                            android:id="@+id/tvComparisonSummary"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="NUTRITION SCORE"
-                            android:textSize="10sp"
-                            android:textColor="@color/home_text_sub"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="4dp" />
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:layout_marginBottom="0dp"
-                            android:baselineAligned="false">
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_weight="1"
-                                android:layout_height="wrap_content"
-                                android:background="@drawable/bg_pill_green_light"
-                                android:padding="8dp"
-                                android:text="82/100"
-                                android:textColor="@color/home_status_low"
-                                android:textStyle="bold"
-                                android:textSize="13sp"
-                                android:layout_marginEnd="6dp" />
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_weight="1"
-                                android:layout_height="wrap_content"
-                                android:background="@drawable/bg_pill_white_border"
-                                android:padding="8dp"
-                                android:text="48/100"
-                                android:textColor="@color/home_text_title"
-                                android:textStyle="bold"
-                                android:textSize="13sp"
-                                android:layout_marginStart="6dp" />
-                        </LinearLayout>
+                            android:background="@drawable/bg_pill_white_border"
+                            android:padding="12dp"
+                            android:text="--"
+                            android:textColor="@color/home_text_title"
+                            android:textSize="13sp"
+                            android:lineSpacingExtra="3dp" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 

@@ -1,15 +1,29 @@
 package com.simats.nutritrace
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
+import android.view.View
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.simats.nutritrace.databinding.ActivityCompareBinding
+import java.io.File
 
 class CompareActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCompareBinding
     private var isProductAUploaded = false
     private var isProductBUploaded = false
+
+    private var imageUriA: String? = null
+    private var imageUriB: String? = null
+    private var scanIdA: Int? = null
+    private var scanIdB: Int? = null
+    private var isComparing = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,133 +32,439 @@ class CompareActivity : AppCompatActivity() {
 
         val bottomNavCard = findViewById<androidx.cardview.widget.CardView>(R.id.bottomNavCard)
         val mainScrollView = findViewById<android.widget.ScrollView>(R.id.mainScrollView)
-        
-        // Find the inner LinearLayout of the CardView to apply padding to
         val navContainer = bottomNavCard.getChildAt(0)
 
-        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { view, windowInsets ->
+        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { _, windowInsets ->
             val insets = windowInsets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
-            
-            // Apply padding to the inner container so the background extends to the bottom
-            navContainer.setPadding(
-                navContainer.paddingLeft,
-                navContainer.paddingTop,
-                navContainer.paddingRight,
-                insets.bottom // Just the inset, no extra gap
-            )
-
+            navContainer.setPadding(navContainer.paddingLeft, navContainer.paddingTop, navContainer.paddingRight, insets.bottom)
             bottomNavCard.post {
-                val navHeight = bottomNavCard.height
-                mainScrollView?.setPadding(
-                    mainScrollView.paddingLeft,
-                    mainScrollView.paddingTop,
-                    mainScrollView.paddingRight,
-                    navHeight // Scroll up above the *total* height of the nav (including its new pad)
-                )
+                mainScrollView?.setPadding(mainScrollView.paddingLeft, mainScrollView.paddingTop, mainScrollView.paddingRight, bottomNavCard.height)
             }
             windowInsets
         }
 
-        // Setup bottom navigation clicks
-        binding.navHome.setOnClickListener {
-            // Navigate back to Home or start HomeActivity and clear top
-            val intent = Intent(this, HomeActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)
-            finish()
-        }
+        // Bottom nav
+        binding.navHome.setOnClickListener { startActivity(Intent(this, HomeActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP }); finish() }
+        binding.btnScanNav.setOnClickListener { startActivity(Intent(this, ScanIngredientsActivity::class.java)) }
+        binding.navHistory.setOnClickListener { startActivity(Intent(this, ScanHistoryActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP }); finish() }
+        binding.navUser.setOnClickListener { startActivity(Intent(this, ProfileActivity::class.java)); finish() }
 
-        binding.btnScanNav.setOnClickListener {
-            startActivity(Intent(this, ScanIngredientsActivity::class.java))
-        }
-        
-        binding.navHistory.setOnClickListener {
-            val intent = Intent(this, ScanHistoryActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)
-            finish()
-        }
+        // Product card click → show source chooser dialog
+        val clickA = View.OnClickListener { if (!isComparing) showProductSourceDialog("A") }
+        binding.cvScanA.setOnClickListener(clickA)
+        binding.cardProductA.setOnClickListener(clickA)
 
-        binding.navUser.setOnClickListener {
-            startActivity(Intent(this, ProfileActivity::class.java))
-            finish()
-        }
-        
-        // Scan Launchers
-        val scanAListener = android.view.View.OnClickListener {
-            val intent = Intent(this, ScanIngredientsActivity::class.java)
-            intent.putExtra("SCAN_SLOT", "A")
-            startActivityForResult(intent, 2001)
-        }
-        binding.cvScanA.setOnClickListener(scanAListener)
-        binding.cardProductA.setOnClickListener(scanAListener)
+        val clickB = View.OnClickListener { if (!isComparing) showProductSourceDialog("B") }
+        binding.cvScanB.setOnClickListener(clickB)
+        binding.cardProductB.setOnClickListener(clickB)
 
-        val scanBListener = android.view.View.OnClickListener {
-            val intent = Intent(this, ScanIngredientsActivity::class.java)
-            intent.putExtra("SCAN_SLOT", "B")
-            startActivityForResult(intent, 2001)
-        }
-        binding.cvScanB.setOnClickListener(scanBListener)
-        binding.cardProductB.setOnClickListener(scanBListener)
-
-        // Move showImageDialog to a class method
-
-        // Removal Buttons
+        // Remove buttons
         binding.ivRemoveA.setOnClickListener {
-            binding.ivProductAImage.visibility = android.view.View.GONE
-            binding.ivRemoveA.visibility = android.view.View.GONE
-            binding.ivScanIconA.visibility = android.view.View.VISIBLE
-            binding.cardProductA.setBackgroundResource(R.drawable.bg_outline_card)
-            isProductAUploaded = false
-            updateComparisonVisibility()
+            if (!isComparing) {
+                binding.ivProductAImage.visibility = View.GONE
+                binding.ivRemoveA.visibility = View.GONE
+                binding.ivScanIconA.visibility = View.VISIBLE
+                binding.cardProductA.setBackgroundResource(R.drawable.bg_outline_card)
+                isProductAUploaded = false; imageUriA = null; scanIdA = null
+                val c = View.OnClickListener { if (!isComparing) showProductSourceDialog("A") }
+                binding.cvScanA.setOnClickListener(c); binding.cardProductA.setOnClickListener(c)
+                updateComparisonVisibility()
+            }
         }
-
         binding.ivRemoveB.setOnClickListener {
-            binding.ivProductBImage.visibility = android.view.View.GONE
-            binding.ivRemoveB.visibility = android.view.View.GONE
-            binding.ivScanIconB.visibility = android.view.View.VISIBLE
-            binding.cardProductB.setBackgroundResource(R.drawable.bg_outline_card)
-            isProductBUploaded = false
-            updateComparisonVisibility()
+            if (!isComparing) {
+                binding.ivProductBImage.visibility = View.GONE
+                binding.ivRemoveB.visibility = View.GONE
+                binding.ivScanIconB.visibility = View.VISIBLE
+                binding.cardProductB.setBackgroundResource(R.drawable.bg_outline_card)
+                isProductBUploaded = false; imageUriB = null; scanIdB = null
+                val c = View.OnClickListener { if (!isComparing) showProductSourceDialog("B") }
+                binding.cvScanB.setOnClickListener(c); binding.cardProductB.setOnClickListener(c)
+                updateComparisonVisibility()
+            }
         }
 
-        binding.llChoiceA.setOnClickListener {
-            handlePreferenceSelection(selectedA = true)
+        binding.llChoiceA.setOnClickListener { handlePreferenceSelection(true) }
+        binding.llChoiceB.setOnClickListener { handlePreferenceSelection(false) }
+    }
+
+    // ──────────────────────────────────────────────
+    // Product Source Chooser Dialog
+    // ──────────────────────────────────────────────
+    private fun showProductSourceDialog(slot: String) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_product_source, null)
+        val dialog = android.app.AlertDialog.Builder(this).setView(dialogView).create()
+        dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.TRANSPARENT))
+
+        dialogView.findViewById<LinearLayout>(R.id.llScanNew).setOnClickListener {
+            dialog.dismiss()
+            val intent = Intent(this, ScanIngredientsActivity::class.java)
+            intent.putExtra("SCAN_SLOT", slot)
+            startActivityForResult(intent, 2001)
         }
 
-        binding.llChoiceB.setOnClickListener {
-            handlePreferenceSelection(selectedA = false)
+        dialogView.findViewById<LinearLayout>(R.id.llFromHistory).setOnClickListener {
+            dialog.dismiss()
+            showHistoryPickerDialog(slot)
+        }
+
+        dialog.show()
+    }
+
+    // ──────────────────────────────────────────────
+    // History Picker Dialog
+    // ──────────────────────────────────────────────
+    private fun showHistoryPickerDialog(slot: String) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_history_picker, null)
+        val dialog = android.app.AlertDialog.Builder(this).setView(dialogView).create()
+        dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.TRANSPARENT))
+
+        val pbLoading = dialogView.findViewById<android.widget.ProgressBar>(R.id.pbLoading)
+        val tvEmpty = dialogView.findViewById<TextView>(R.id.tvEmptyHistory)
+        val svList = dialogView.findViewById<android.widget.ScrollView>(R.id.svHistoryList)
+        val llList = dialogView.findViewById<LinearLayout>(R.id.llHistoryPickerList)
+        dialogView.findViewById<ImageView>(R.id.ivCloseHistoryPicker).setOnClickListener { dialog.dismiss() }
+
+        dialog.show()
+
+        // Fetch scan history
+        ApiClient.getAuth(this, "/scan/history") { success, json ->
+            runOnUiThread {
+                pbLoading.visibility = View.GONE
+                if (!success || json?.get("success")?.asBoolean != true) {
+                    tvEmpty.text = "Failed to load history"
+                    tvEmpty.visibility = View.VISIBLE
+                    return@runOnUiThread
+                }
+
+                val scans = json.getAsJsonArray("scans")
+                if (scans == null || scans.size() == 0) {
+                    tvEmpty.visibility = View.VISIBLE
+                    return@runOnUiThread
+                }
+
+                svList.visibility = View.VISIBLE
+                llList.removeAllViews()
+
+                for (i in 0 until scans.size()) {
+                    val s = scans[i].asJsonObject
+                    val scanId = s.get("id").asInt
+                    val productName = s.get("product_name")?.asString ?: "Unknown"
+                    val brandName = s.get("brand_name")?.asString ?: ""
+                    val score = s.get("score").asInt
+                    val imagePath = s.get("image_path")?.let { if (it.isJsonNull) "" else it.asString } ?: ""
+
+                    val itemView = layoutInflater.inflate(R.layout.item_scan_history, llList, false)
+                    val tvName = itemView.findViewById<TextView>(R.id.tvProductName)
+                    val tvBrand = itemView.findViewById<TextView>(R.id.tvBrandName)
+                    val tvBadge = itemView.findViewById<TextView>(R.id.tvRiskBadge)
+                    val ivThumb = itemView.findViewById<ImageView>(R.id.ivHistoryThumbnail)
+
+                    tvName.text = productName
+                    tvBrand.text = if (brandName.isNotBlank()) brandName else "Unknown"
+
+                    when {
+                        score >= 70 -> { tvBadge.text = "SAFE"; tvBadge.setBackgroundResource(R.drawable.bg_pill_safe); tvBadge.setTextColor(Color.parseColor("#16B88A")) }
+                        score >= 40 -> { tvBadge.text = "MODERATE"; tvBadge.setBackgroundResource(R.drawable.bg_pill_moderate); tvBadge.setTextColor(Color.parseColor("#F5A623")) }
+                        else -> { tvBadge.text = "HIGH"; tvBadge.setBackgroundResource(R.drawable.bg_pill_high); tvBadge.setTextColor(Color.parseColor("#E74C3C")) }
+                    }
+
+                    if (imagePath.isNotEmpty()) {
+                        ApiClient.loadImage(ivThumb, imagePath)
+                    }
+
+                    itemView.setOnClickListener {
+                        dialog.dismiss()
+                        onHistoryProductSelected(slot, scanId, productName, imagePath)
+                    }
+
+                    llList.addView(itemView)
+                }
+            }
         }
     }
 
-    private fun handlePreferenceSelection(selectedA: Boolean) {
-        if (selectedA) {
-            binding.ivChoiceATick.visibility = android.view.View.VISIBLE
-            binding.tvChoiceACircle.visibility = android.view.View.INVISIBLE
-            binding.tvChoiceAText.text = "Saved!"
-            binding.tvChoiceAText.setTextColor(android.graphics.Color.parseColor("#16B88A"))
+    // ──────────────────────────────────────────────
+    // Handle history product selection
+    // ──────────────────────────────────────────────
+    private fun onHistoryProductSelected(slot: String, scanId: Int, productName: String, imagePath: String) {
+        if (slot == "A") {
+            scanIdA = scanId
+            imageUriA = null // No local URI — image is on server
+            isProductAUploaded = true
 
-            binding.ivChoiceBTick.visibility = android.view.View.GONE
-            binding.tvChoiceBCircle.visibility = android.view.View.VISIBLE
-            binding.tvChoiceBText.text = "Product B"
-            binding.tvChoiceBText.setTextColor(android.graphics.Color.parseColor("#94A3B8"))
+            binding.ivProductAImage.visibility = View.VISIBLE
+            binding.ivScanIconA.visibility = View.GONE
+            binding.ivRemoveA.visibility = View.VISIBLE
+            binding.cardProductA.setBackgroundResource(R.drawable.bg_outline_card_highlight)
+            binding.cardProductA.setOnClickListener(null)
+            binding.cvScanA.setOnClickListener(null)
+
+            if (imagePath.isNotEmpty()) {
+                ApiClient.loadImage(binding.ivProductAImage, imagePath)
+            }
         } else {
-            binding.ivChoiceBTick.visibility = android.view.View.VISIBLE
-            binding.tvChoiceBCircle.visibility = android.view.View.INVISIBLE
-            binding.tvChoiceBText.text = "Saved!"
-            binding.tvChoiceBText.setTextColor(android.graphics.Color.parseColor("#16B88A"))
+            scanIdB = scanId
+            imageUriB = null
+            isProductBUploaded = true
 
-            binding.ivChoiceATick.visibility = android.view.View.GONE
-            binding.tvChoiceACircle.visibility = android.view.View.VISIBLE
-            binding.tvChoiceAText.text = "Product A"
-            binding.tvChoiceAText.setTextColor(android.graphics.Color.parseColor("#94A3B8"))
+            binding.ivProductBImage.visibility = View.VISIBLE
+            binding.ivScanIconB.visibility = View.GONE
+            binding.ivRemoveB.visibility = View.VISIBLE
+            binding.cardProductB.setBackgroundResource(R.drawable.bg_outline_card_highlight)
+            binding.cardProductB.setOnClickListener(null)
+            binding.cvScanB.setOnClickListener(null)
+
+            if (imagePath.isNotEmpty()) {
+                ApiClient.loadImage(binding.ivProductBImage, imagePath)
+            }
+        }
+        updateComparisonVisibility()
+    }
+
+    // ──────────────────────────────────────────────
+    // onActivityResult — from camera scan
+    // ──────────────────────────────────────────────
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 2001 && resultCode == RESULT_OK) {
+            val slot = data?.getStringExtra("SCAN_SLOT")
+            val imageUriString = data?.getStringExtra("IMAGE_URI")
+            if (slot == "A") {
+                binding.ivProductAImage.visibility = View.VISIBLE
+                if (imageUriString != null) {
+                    binding.ivProductAImage.setImageURI(android.net.Uri.parse(imageUriString))
+                    binding.ivProductAImage.setOnClickListener { showImageDialog(imageUriString) }
+                }
+                binding.ivRemoveA.visibility = View.VISIBLE
+                binding.ivScanIconA.visibility = View.GONE
+                binding.cardProductA.setBackgroundResource(R.drawable.bg_outline_card_highlight)
+                binding.cardProductA.setOnClickListener(null)
+                binding.cvScanA.setOnClickListener(null)
+                isProductAUploaded = true
+                imageUriA = imageUriString
+                scanIdA = null
+                updateComparisonVisibility()
+            } else if (slot == "B") {
+                binding.ivProductBImage.visibility = View.VISIBLE
+                if (imageUriString != null) {
+                    binding.ivProductBImage.setImageURI(android.net.Uri.parse(imageUriString))
+                    binding.ivProductBImage.setOnClickListener { showImageDialog(imageUriString) }
+                }
+                binding.ivRemoveB.visibility = View.VISIBLE
+                binding.ivScanIconB.visibility = View.GONE
+                binding.cardProductB.setBackgroundResource(R.drawable.bg_outline_card_highlight)
+                binding.cardProductB.setOnClickListener(null)
+                binding.cvScanB.setOnClickListener(null)
+                isProductBUploaded = true
+                imageUriB = imageUriString
+                scanIdB = null
+                updateComparisonVisibility()
+            }
+        }
+    }
+
+    // ──────────────────────────────────────────────
+    // Comparison flow
+    // ──────────────────────────────────────────────
+    private fun updateComparisonVisibility() {
+        if (isProductAUploaded && isProductBUploaded) {
+            binding.llStartPlaceholder.visibility = View.GONE
+            binding.llComparisonResults.visibility = View.GONE
+            binding.llLoadingState.visibility = View.VISIBLE
+            resetChoiceState()
+            startComparisonFlow()
+        } else {
+            binding.llStartPlaceholder.visibility = View.VISIBLE
+            binding.llComparisonResults.visibility = View.GONE
+            binding.llLoadingState.visibility = View.GONE
+        }
+    }
+
+    private fun resetChoiceState() {
+        binding.ivChoiceATick.visibility = View.GONE
+        binding.tvChoiceACircle.visibility = View.VISIBLE
+        binding.tvChoiceAText.text = "Product A"
+        binding.tvChoiceAText.setTextColor(Color.parseColor("#94A3B8"))
+        binding.ivChoiceBTick.visibility = View.GONE
+        binding.tvChoiceBCircle.visibility = View.VISIBLE
+        binding.tvChoiceBText.text = "Product B"
+        binding.tvChoiceBText.setTextColor(Color.parseColor("#94A3B8"))
+    }
+
+    private fun startComparisonFlow() {
+        if (isComparing) return
+        isComparing = true
+
+        runOnUiThread {
+            binding.tvLoadingTitle.text = "Analyzing Products..."
+            binding.tvLoadingSubtitle.text = "Preparing comparison..."
         }
 
-        // Navigate to History page after a short delay
+        // Resolve scan IDs — upload images only for products that don't have IDs yet
+        resolveScanId("A") { idA ->
+            if (idA == null) {
+                isComparing = false
+                runOnUiThread { showError("Failed to analyze Product A"); resetToPlaceholder() }
+                return@resolveScanId
+            }
+            scanIdA = idA
+
+            resolveScanId("B") { idB ->
+                if (idB == null) {
+                    isComparing = false
+                    runOnUiThread { showError("Failed to analyze Product B"); resetToPlaceholder() }
+                    return@resolveScanId
+                }
+                scanIdB = idB
+
+                // Both IDs ready — compare
+                runOnUiThread { binding.tvLoadingSubtitle.text = "Comparing products with AI..." }
+
+                ApiClient.postAuth(this, "/compare", mapOf("scan_id_a" to idA, "scan_id_b" to idB)) { success, response ->
+                    isComparing = false
+                    if (!success || response == null) {
+                        runOnUiThread { showError(response?.get("message")?.asString ?: "Comparison failed"); resetToPlaceholder() }
+                        return@postAuth
+                    }
+
+                    val comparison = response.getAsJsonObject("comparison")
+                    if (comparison == null) {
+                        runOnUiThread { showError("Invalid comparison response"); resetToPlaceholder() }
+                        return@postAuth
+                    }
+
+                    val productA = comparison.getAsJsonObject("product_a")
+                    val productB = comparison.getAsJsonObject("product_b")
+                    val recommendation = comparison.get("recommendation")?.asString ?: "NEITHER"
+                    val summary = comparison.get("summary")?.asString ?: ""
+
+                    runOnUiThread {
+                        displayComparisonResults(
+                            productA?.get("name")?.asString ?: "Product A",
+                            productB?.get("name")?.asString ?: "Product B",
+                            productA?.get("brand")?.asString ?: "--",
+                            productB?.get("brand")?.asString ?: "--",
+                            productA?.get("score")?.asInt ?: 0,
+                            productB?.get("score")?.asInt ?: 0,
+                            productA?.get("risk_level")?.asString ?: "--",
+                            productB?.get("risk_level")?.asString ?: "--",
+                            when (recommendation) {
+                                "A" -> "${productA?.get("name")?.asString} is the better choice"
+                                "B" -> "${productB?.get("name")?.asString} is the better choice"
+                                else -> "Neither product is clearly better"
+                            },
+                            summary, recommendation
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Resolve a scan ID for the given slot.
+     * If scanId is already set (from history), return it immediately.
+     * Otherwise, upload the image to /scan/analyze and return the new scan ID.
+     */
+    private fun resolveScanId(slot: String, callback: (Int?) -> Unit) {
+        val existingId = if (slot == "A") scanIdA else scanIdB
+        val uri = if (slot == "A") imageUriA else imageUriB
+
+        if (existingId != null) {
+            // Already have a scan ID (from history) — skip upload
+            callback(existingId)
+            return
+        }
+
+        if (uri == null) {
+            callback(null)
+            return
+        }
+
+        runOnUiThread { binding.tvLoadingSubtitle.text = "Scanning Product $slot ingredients..." }
+
+        val file = uriToFile(uri)
+        if (file == null) {
+            callback(null)
+            return
+        }
+
+        ApiClient.uploadImage(this, "/scan/analyze", file) { success, response ->
+            if (!success || response == null) {
+                callback(null)
+                return@uploadImage
+            }
+            val scanId = response.getAsJsonObject("scan")?.get("id")?.asInt
+            file.delete()
+            callback(scanId)
+        }
+    }
+
+    // ──────────────────────────────────────────────
+    // Display results
+    // ──────────────────────────────────────────────
+    private fun displayComparisonResults(
+        nameA: String, nameB: String, brandA: String, brandB: String,
+        scoreA: Int, scoreB: Int, riskA: String, riskB: String,
+        recommendationText: String, summary: String, recommendation: String
+    ) {
+        binding.llLoadingState.visibility = View.GONE
+        binding.llComparisonResults.visibility = View.VISIBLE
+
+        binding.tvRecommendationSummary.text = recommendationText
+        when (recommendation) {
+            "A" -> binding.tvRecommendationTitle.text = "Choose $nameA"
+            "B" -> binding.tvRecommendationTitle.text = "Choose $nameB"
+            else -> binding.tvRecommendationTitle.text = "AI Recommendation"
+        }
+
+        binding.tvNameA.text = nameA; binding.tvNameB.text = nameB
+        binding.tvScoreA.text = "${scoreA}/100"; binding.tvScoreB.text = "${scoreB}/100"
+        binding.tvRiskA.text = riskA.lowercase().replaceFirstChar { it.uppercase() }
+        binding.tvRiskB.text = riskB.lowercase().replaceFirstChar { it.uppercase() }
+        binding.tvBrandA.text = if (brandA.isBlank() || brandA == "--") "--" else brandA
+        binding.tvBrandB.text = if (brandB.isBlank() || brandB == "--") "--" else brandB
+        binding.tvComparisonSummary.text = if (summary.isNotBlank()) summary else "No summary available."
+
+        val greenBg = R.drawable.bg_pill_green_light
+        val whiteBg = R.drawable.bg_pill_white_border
+        val greenColor = resources.getColor(R.color.home_status_low, theme)
+        val darkColor = Color.parseColor("#1E293B")
+
+        val aIsGreen = recommendation != "B"
+        fun style(tvA: TextView, tvB: TextView) {
+            tvA.setBackgroundResource(if (aIsGreen) greenBg else whiteBg)
+            tvA.setTextColor(if (aIsGreen) greenColor else darkColor)
+            tvB.setBackgroundResource(if (aIsGreen) whiteBg else greenBg)
+            tvB.setTextColor(if (aIsGreen) darkColor else greenColor)
+        }
+        style(binding.tvScoreA, binding.tvScoreB)
+        style(binding.tvRiskA, binding.tvRiskB)
+        style(binding.tvNameA, binding.tvNameB)
+        style(binding.tvBrandA, binding.tvBrandB)
+
+        binding.tvChoiceAText.text = nameA
+        binding.tvChoiceBText.text = nameB
+    }
+
+    // ──────────────────────────────────────────────
+    // Helpers
+    // ──────────────────────────────────────────────
+    private fun handlePreferenceSelection(selectedA: Boolean) {
+        if (selectedA) {
+            binding.ivChoiceATick.visibility = View.VISIBLE; binding.tvChoiceACircle.visibility = View.INVISIBLE
+            binding.tvChoiceAText.text = "Saved!"; binding.tvChoiceAText.setTextColor(Color.parseColor("#16B88A"))
+            binding.ivChoiceBTick.visibility = View.GONE; binding.tvChoiceBCircle.visibility = View.VISIBLE
+            binding.tvChoiceBText.text = "Product B"; binding.tvChoiceBText.setTextColor(Color.parseColor("#94A3B8"))
+        } else {
+            binding.ivChoiceBTick.visibility = View.VISIBLE; binding.tvChoiceBCircle.visibility = View.INVISIBLE
+            binding.tvChoiceBText.text = "Saved!"; binding.tvChoiceBText.setTextColor(Color.parseColor("#16B88A"))
+            binding.ivChoiceATick.visibility = View.GONE; binding.tvChoiceACircle.visibility = View.VISIBLE
+            binding.tvChoiceAText.text = "Product A"; binding.tvChoiceAText.setTextColor(Color.parseColor("#94A3B8"))
+        }
         binding.root.postDelayed({
-            val intent = Intent(this, ScanHistoryActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)
+            startActivity(Intent(this, ScanHistoryActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP })
             finish()
         }, 1000)
     }
@@ -152,81 +472,27 @@ class CompareActivity : AppCompatActivity() {
     private fun showImageDialog(imageUriString: String?) {
         val dialog = android.app.Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
         val dialogView = layoutInflater.inflate(R.layout.dialog_image_preview, null)
-        
-        val ivClose = dialogView.findViewById<android.widget.ImageView>(R.id.ivCloseDialog)
-        val ivPreview = dialogView.findViewById<android.widget.ImageView>(R.id.ivFullImage)
-
-        if (imageUriString != null) {
-            ivPreview.setImageURI(android.net.Uri.parse(imageUriString))
-        } else {
-            ivPreview.setImageResource(R.drawable.bg_splash_logo_square)
-        }
-
-        ivClose.setOnClickListener {
-            dialog.dismiss()
-        }
-
-        dialog.setContentView(dialogView)
-        dialog.show()
+        if (imageUriString != null) dialogView.findViewById<ImageView>(R.id.ivFullImage).setImageURI(android.net.Uri.parse(imageUriString))
+        dialogView.findViewById<ImageView>(R.id.ivCloseDialog).setOnClickListener { dialog.dismiss() }
+        dialog.setContentView(dialogView); dialog.show()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 2001 && resultCode == RESULT_OK) {
-            val slot = data?.getStringExtra("SCAN_SLOT")
-            val imageUriString = data?.getStringExtra("IMAGE_URI")
-            if (slot == "A") {
-                binding.ivProductAImage.visibility = android.view.View.VISIBLE
-                if (imageUriString != null) {
-                    binding.ivProductAImage.setImageURI(android.net.Uri.parse(imageUriString))
-                    binding.ivProductAImage.setOnClickListener { showImageDialog(imageUriString) }
-                }
-                binding.ivRemoveA.visibility = android.view.View.VISIBLE
-                binding.ivScanIconA.visibility = android.view.View.GONE
-                binding.cardProductA.setBackgroundResource(R.drawable.bg_outline_card_highlight)
-                
-                // Clear the parent card generic listener so tapping the image doesn't just re-open the camera
-                binding.cardProductA.setOnClickListener(null)
-                binding.cvScanA.setOnClickListener(null)
-
-                isProductAUploaded = true
-                updateComparisonVisibility()
-            } else if (slot == "B") {
-                binding.ivProductBImage.visibility = android.view.View.VISIBLE
-                if (imageUriString != null) {
-                    binding.ivProductBImage.setImageURI(android.net.Uri.parse(imageUriString))
-                    binding.ivProductBImage.setOnClickListener { showImageDialog(imageUriString) }
-                }
-                binding.ivRemoveB.visibility = android.view.View.VISIBLE
-                binding.ivScanIconB.visibility = android.view.View.GONE
-                binding.cardProductB.setBackgroundResource(R.drawable.bg_outline_card_highlight)
-                
-                // Clear the parent card generic listener so tapping the image doesn't just re-open the camera
-                binding.cardProductB.setOnClickListener(null)
-                binding.cvScanB.setOnClickListener(null)
-
-                isProductBUploaded = true
-                updateComparisonVisibility()
-            }
+    private fun uriToFile(uriString: String): File? {
+        return try {
+            val uri = android.net.Uri.parse(uriString)
+            val inputStream = contentResolver.openInputStream(uri) ?: return null
+            val file = File(cacheDir, "compare_${System.currentTimeMillis()}.jpg")
+            file.outputStream().use { output -> inputStream.copyTo(output) }
+            inputStream.close()
+            file
+        } catch (e: Exception) {
+            Log.e("CompareActivity", "Error: ${e.message}")
+            null
         }
     }
 
-    private fun updateComparisonVisibility() {
-        if (isProductAUploaded && isProductBUploaded) {
-            binding.llStartPlaceholder.visibility = android.view.View.GONE
-            binding.llComparisonResults.visibility = android.view.View.VISIBLE
-            // Reset selection state when new comparisons happen
-            binding.ivChoiceATick.visibility = android.view.View.GONE
-            binding.tvChoiceACircle.visibility = android.view.View.VISIBLE
-            binding.tvChoiceAText.text = "Product A"
-            binding.tvChoiceAText.setTextColor(android.graphics.Color.parseColor("#94A3B8"))
-            binding.ivChoiceBTick.visibility = android.view.View.GONE
-            binding.tvChoiceBCircle.visibility = android.view.View.VISIBLE
-            binding.tvChoiceBText.text = "Product B"
-            binding.tvChoiceBText.setTextColor(android.graphics.Color.parseColor("#94A3B8"))
-        } else {
-            binding.llStartPlaceholder.visibility = android.view.View.VISIBLE
-            binding.llComparisonResults.visibility = android.view.View.GONE
-        }
+    private fun showError(message: String) { Toast.makeText(this, message, Toast.LENGTH_LONG).show() }
+    private fun resetToPlaceholder() {
+        binding.llLoadingState.visibility = View.GONE; binding.llComparisonResults.visibility = View.GONE; binding.llStartPlaceholder.visibility = View.VISIBLE
     }
 }

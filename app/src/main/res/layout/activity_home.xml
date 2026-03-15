@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/home_bg">
+    android:background="@color/home_bg"
+    android:fitsSystemWindows="true">
 
     <!-- Scrollable Content -->
     <ScrollView
@@ -133,6 +134,7 @@
                     app:layout_constraintStart_toStartOf="parent">
 
                     <View
+                        android:id="@+id/vRiskDot"
                         android:layout_width="6dp"
                         android:layout_height="6dp"
                         android:layout_marginEnd="6dp"
@@ -140,6 +142,7 @@
                         android:backgroundTint="@color/white" />
 
                     <TextView
+                        android:id="@+id/tvRiskPillLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="LOW RISK"

@@ -85,13 +85,21 @@ class ScanHistoryActivity : AppCompatActivity() {
                             val brandName = s.get("brand_name")?.asString ?: ""
                             val score = s.get("score").asInt
 
+                            val imagePath = s.get("image_path")?.let { if (it.isJsonNull) "" else it.asString } ?: ""
+
                             val itemView = layoutInflater.inflate(R.layout.item_scan_history, binding.llHistoryList, false)
                             val tvProductName = itemView.findViewById<android.widget.TextView>(R.id.tvProductName)
                             val tvBrandName = itemView.findViewById<android.widget.TextView>(R.id.tvBrandName)
                             val tvRiskBadge = itemView.findViewById<android.widget.TextView>(R.id.tvRiskBadge)
+                            val ivThumbnail = itemView.findViewById<android.widget.ImageView>(R.id.ivHistoryThumbnail)
 
                             tvProductName.text = productName
                             tvBrandName.text = brandName
+
+                            // Load product thumbnail from server
+                            if (imagePath.isNotEmpty()) {
+                                ApiClient.loadImage(ivThumbnail, imagePath)
+                            }
 
                             when {
                                 score >= 70 -> {

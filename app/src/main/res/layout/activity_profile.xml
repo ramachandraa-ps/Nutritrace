@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8FAFC">
+    android:background="#F8FAFC"
+    android:fitsSystemWindows="true">
 
     <ScrollView
         android:id="@+id/mainScrollView"
@@ -33,7 +34,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:paddingHorizontal="24dp"
-                    android:paddingTop="48dp"
+                    android:paddingTop="16dp"
                     android:gravity="center_vertical"
                     app:layout_constraintTop_toTopOf="parent">
                     
@@ -90,7 +91,7 @@
                             android:id="@+id/tvProfileName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Alex Johnson"
+                            android:text=""
                             android:textColor="@color/white"
                             android:textSize="20sp"
                             android:textStyle="bold" />
@@ -99,7 +100,7 @@
                             android:id="@+id/tvProfileEmail"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="alex.j@example.com"
+                            android:text=""
                             android:textColor="#E2E8F0"
                             android:textSize="14sp"
                             android:layout_marginTop="2dp" />

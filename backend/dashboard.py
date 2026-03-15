@@ -23,7 +23,7 @@ def register_dashboard_routes(app):
 
             # Latest 3 scans
             cursor.execute(
-                """SELECT id, product_name, brand_name, score, risk_level, scanned_at
+                """SELECT id, product_name, brand_name, score, risk_level, scanned_at, image_path
                    FROM scans WHERE user_id = %s ORDER BY scanned_at DESC LIMIT 3""",
                 (current_user_id,)
             )
