@@ -20,12 +20,23 @@ class AnalysisResultActivity : AppCompatActivity() {
 
         binding.ivBack.setOnClickListener { finish() }
 
-        // Setup Thumbnail
+        // Setup Thumbnail — from local URI or from server image_path
         val imageUriString = intent.getStringExtra("IMAGE_URI")
         if (imageUriString != null) {
             binding.cvThumbnail.visibility = View.VISIBLE
             binding.ivThumbnailImage.setImageURI(android.net.Uri.parse(imageUriString))
             binding.cvThumbnail.setOnClickListener { showImagePopup(imageUriString) }
+        } else {
+            // Try to load from server using image_path in SCAN_JSON
+            val scanJsonStr = intent.getStringExtra("SCAN_JSON")
+            if (scanJsonStr != null) {
+                val scanObj = com.google.gson.Gson().fromJson(scanJsonStr, com.google.gson.JsonObject::class.java)?.getAsJsonObject("scan")
+                val imagePath = scanObj?.get("image_path")?.let { if (it.isJsonNull) null else it.asString }
+                if (!imagePath.isNullOrEmpty()) {
+                    binding.cvThumbnail.visibility = View.VISIBLE
+                    ApiClient.loadImage(binding.ivThumbnailImage, imagePath)
+                }
+            }
         }
 
         binding.ivEditName.setOnClickListener { showEditNameDialog() }
