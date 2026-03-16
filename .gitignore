@@ -22,3 +22,4 @@ backend/.env
 backend/uploads/
 backend/__pycache__/
 backend/*.pyc
+backend/*.json
