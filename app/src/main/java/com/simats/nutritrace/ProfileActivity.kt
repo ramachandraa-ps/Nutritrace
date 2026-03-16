@@ -122,28 +122,35 @@ class ProfileActivity : AppCompatActivity() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: android.text.Editable?) {
-                if (s?.toString()?.trim() == "DELETE") {
-                    btnDelete.isEnabled = true
-                    btnDelete.alpha = 1.0f
-                } else {
-                    btnDelete.isEnabled = false
-                    btnDelete.alpha = 0.5f
-                }
+                val hasText = !s.isNullOrEmpty() && s.toString().length >= 8
+                btnDelete.isEnabled = hasText
+                btnDelete.alpha = if (hasText) 1.0f else 0.5f
             }
         })
 
         btnDelete.setOnClickListener {
-            // Get stored password for deletion confirmation
-            val prefs = getSharedPreferences("NutriTracePrefs", MODE_PRIVATE)
-            // Use a placeholder - backend requires password but we use confirmation text
-            ApiClient.deleteAuth(this, "/user/account", mapOf("password" to etConfirmDelete.text.toString())) { success, _ ->
+            val password = etConfirmDelete.text.toString()
+            btnDelete.isEnabled = false
+            btnDelete.alpha = 0.5f
+            btnDelete.text = "Deleting..."
+
+            ApiClient.deleteAuth(this, "/user/account", mapOf("password" to password)) { success, json ->
                 runOnUiThread {
-                    dialog.dismiss()
-                    ApiClient.clearSession(this)
-                    startActivity(Intent(this, LoginActivity::class.java).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    })
-                    finish()
+                    if (success && json?.get("success")?.asBoolean == true) {
+                        dialog.dismiss()
+                        ApiClient.clearSession(this)
+                        android.widget.Toast.makeText(this, "Account deleted successfully", android.widget.Toast.LENGTH_SHORT).show()
+                        startActivity(Intent(this, LoginActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        })
+                        finish()
+                    } else {
+                        btnDelete.isEnabled = true
+                        btnDelete.alpha = 1.0f
+                        btnDelete.text = "Delete Forever"
+                        val message = json?.get("message")?.asString ?: "Incorrect password"
+                        android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }
