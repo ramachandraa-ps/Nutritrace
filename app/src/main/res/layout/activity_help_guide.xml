@@ -252,7 +252,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="The Risk Score (0-100) is calculated based on:\n• Harmful additives and preservatives\n• High sugar, sodium, or unhealthy fat content\n• Potential allergens based on your profile\n\nA score of 0-30 means low risk (safe to consume), 40-60 is moderate (consume with caution), and 70-100 is high risk (avoid if possible)."
+                            android:text="The Safety Score (0-100) is calculated based on:\n• Harmful additives and preservatives\n• High sugar, sodium, or unhealthy fat content\n• Potential allergens based on your profile\n\nA score of 70-100 means the product is safe to consume, 40-69 is moderate (consume with caution), and 0-39 is high risk (avoid if possible). The higher the score, the safer the product is for you."
                             android:textColor="#64748B"
                             android:textSize="13sp"
                             android:lineSpacingExtra="4dp"/>

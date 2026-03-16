@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit
 
 object ApiClient {
     // CHANGE THIS to your computer's local IP address (run ipconfig in terminal)
-    private const val BASE_URL = "http://10.199.143.6:5000"
+    private const val BASE_URL = "http://10.161.158.6:5000"
 
     private val client = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)

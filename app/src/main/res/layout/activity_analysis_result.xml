@@ -350,19 +350,6 @@
                         android:textStyle="bold" />
 
                     <TextView
-                        android:id="@+id/tabRisk"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:background="@android:color/transparent"
-                        android:paddingHorizontal="20dp"
-                        android:paddingVertical="8dp"
-                        android:text="Risk Breakdown"
-                        android:textColor="@color/home_text_sub"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-
-                    <TextView
                         android:id="@+id/tabGuidance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -446,15 +433,7 @@
                         android:orientation="vertical" />
                 </LinearLayout>
 
-                <!-- 3. Risk Breakdown Layout (dynamically populated) -->
-                <LinearLayout
-                    android:id="@+id/llRiskBreakdown"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:visibility="gone" />
-
-                <!-- 4. Guidance Layout (dynamically populated) -->
+                <!-- 3. Guidance Layout (dynamically populated) -->
                 <androidx.cardview.widget.CardView
                     android:id="@+id/llGuidance"
                     android:layout_width="match_parent"

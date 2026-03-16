@@ -7,7 +7,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cardview.widget.CardView
 import com.simats.nutritrace.databinding.ActivityAnalysisResultBinding
 
 class AnalysisResultActivity : AppCompatActivity() {
@@ -137,57 +136,6 @@ class AnalysisResultActivity : AppCompatActivity() {
             }
         }
 
-        // Risk Breakdown tab (dynamic cards)
-        val riskAnalysis = scanObj.getAsJsonArray("risk_analysis")
-        if (riskAnalysis != null) {
-            binding.llRiskBreakdown.removeAllViews()
-            for (i in 0 until riskAnalysis.size()) {
-                val risk = riskAnalysis[i].asJsonObject
-                val title = risk.get("title")?.asString ?: ""
-                val description = risk.get("description")?.asString ?: ""
-
-                val card = CardView(this).apply {
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    ).apply { bottomMargin = (16 * resources.displayMetrics.density).toInt() }
-                    radius = 16 * resources.displayMetrics.density
-                    cardElevation = 2 * resources.displayMetrics.density
-                    setCardBackgroundColor(Color.WHITE)
-                }
-
-                val innerLayout = LinearLayout(this).apply {
-                    orientation = LinearLayout.VERTICAL
-                    val pad = (20 * resources.displayMetrics.density).toInt()
-                    setPadding(pad, pad, pad, pad)
-                }
-
-                val tvTitle = TextView(this).apply {
-                    text = title
-                    setTextColor(Color.parseColor("#0E1726"))
-                    textSize = 15f
-                    setTypeface(typeface, android.graphics.Typeface.BOLD)
-                }
-
-                val tvDesc = TextView(this).apply {
-                    text = description
-                    setTextColor(Color.parseColor("#475569"))
-                    textSize = 13f
-                    setLineSpacing(4 * resources.displayMetrics.density, 1f)
-                    val topMargin = (12 * resources.displayMetrics.density).toInt()
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    ).apply { this.topMargin = topMargin }
-                }
-
-                innerLayout.addView(tvTitle)
-                innerLayout.addView(tvDesc)
-                card.addView(innerLayout)
-                binding.llRiskBreakdown.addView(card)
-            }
-        }
-
         // Guidance tab (dynamic bullet points)
         val guidance = scanObj.getAsJsonArray("guidance")
         if (guidance != null) {
@@ -265,8 +213,8 @@ class AnalysisResultActivity : AppCompatActivity() {
     }
 
     private fun setupTabs() {
-        val tabs = listOf(binding.tabOverview, binding.tabIngredients, binding.tabRisk, binding.tabGuidance)
-        val contents = listOf(binding.llOverview, binding.llIngredients, binding.llRiskBreakdown, binding.llGuidance)
+        val tabs = listOf(binding.tabOverview, binding.tabIngredients, binding.tabGuidance)
+        val contents = listOf(binding.llOverview, binding.llIngredients, binding.llGuidance)
 
         for (i in tabs.indices) {
             tabs[i].setOnClickListener {

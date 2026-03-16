@@ -463,6 +463,13 @@ class CompareActivity : AppCompatActivity() {
             binding.ivChoiceATick.visibility = View.GONE; binding.tvChoiceACircle.visibility = View.VISIBLE
             binding.tvChoiceAText.text = "Product A"; binding.tvChoiceAText.setTextColor(Color.parseColor("#94A3B8"))
         }
+
+        // Delete the non-preferred scan from history
+        val scanToDelete = if (selectedA) scanIdB else scanIdA
+        if (scanToDelete != null) {
+            ApiClient.deleteAuth(this, "/scan/$scanToDelete") { _, _ -> }
+        }
+
         binding.root.postDelayed({
             startActivity(Intent(this, ScanHistoryActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP })
             finish()
