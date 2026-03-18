@@ -58,12 +58,19 @@ def register_compare_routes(app):
             recommendation = ai_result.get('recommendation', 'NEITHER')
             summary = ai_result.get('summary', '')
 
+            # Override recommendation when scores are equal or very close (diff <= 5)
+            score_a = scan_a['score'] or 0
+            score_b = scan_b['score'] or 0
+            if abs(score_a - score_b) <= 5:
+                recommendation = 'EQUAL'
+                summary = ai_result.get('summary', 'Both products have a similar health impact based on their ingredients.')
+
             # Save comparison
             cursor.execute(
                 """INSERT INTO comparisons (user_id, scan_id_a, scan_id_b, chosen_product, ai_summary)
                    VALUES (%s, %s, %s, %s, %s)""",
                 (current_user_id, scan_id_a, scan_id_b,
-                 recommendation if recommendation in ('A', 'B') else None,
+                 recommendation if recommendation in ('A', 'B') else None,  # EQUAL stored as NULL
                  summary)
             )
             comparison_id = cursor.lastrowid

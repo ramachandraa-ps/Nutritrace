@@ -38,12 +38,24 @@ class ScanIngredientsActivity : AppCompatActivity() {
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
             Log.d("PhotoPicker", "Selected URI: $uri")
-            val reviewIntent = Intent(this, ReviewImageActivity::class.java)
-            reviewIntent.putExtra("SCAN_SLOT", intent.getStringExtra("SCAN_SLOT"))
-            reviewIntent.putExtra("IMAGE_URI", uri.toString())
-            reviewIntent.data = uri
-            reviewIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            startActivityForResult(reviewIntent, 1001)
+            // Copy gallery image to local cache file to avoid content:// URI permission issues
+            try {
+                val localFile = File(
+                    cacheDir,
+                    "gallery_${SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US).format(System.currentTimeMillis())}.jpg"
+                )
+                contentResolver.openInputStream(uri)?.use { input ->
+                    localFile.outputStream().use { output -> input.copyTo(output) }
+                }
+                val localUri = Uri.fromFile(localFile)
+                val reviewIntent = Intent(this, ReviewImageActivity::class.java)
+                reviewIntent.putExtra("SCAN_SLOT", intent.getStringExtra("SCAN_SLOT"))
+                reviewIntent.putExtra("IMAGE_URI", localUri.toString())
+                startActivityForResult(reviewIntent, 1001)
+            } catch (e: Exception) {
+                Log.e("PhotoPicker", "Failed to copy gallery image", e)
+                Toast.makeText(this, "Failed to load selected image", Toast.LENGTH_SHORT).show()
+            }
         } else {
             Log.d("PhotoPicker", "No media selected")
         }

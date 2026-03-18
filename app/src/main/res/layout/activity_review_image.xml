@@ -11,7 +11,7 @@
         android:id="@+id/ivPreview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop"
+        android:scaleType="fitCenter"
         android:src="@drawable/bg_splash_logo_square"
         android:alpha="0.8"
         app:layout_constraintBottom_toBottomOf="parent"

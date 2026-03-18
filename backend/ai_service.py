@@ -103,7 +103,7 @@ def compare_products(product_a_name, product_a_ingredients, product_b_name, prod
     """Compare two products using Gemini AI."""
 
     prompt = f"""You are a food safety and nutrition expert AI. Compare these two food products
-for the user with the given health profile.
+for the user with the given health profile. Be precise and fair in your analysis.
 
 USER HEALTH PROFILE:
 - Age Group: {age_group}
@@ -116,9 +116,16 @@ Ingredients: {product_a_ingredients}
 PRODUCT B: {product_b_name}
 Ingredients: {product_b_ingredients}
 
+IMPORTANT GUIDELINES:
+- Only recommend "A" or "B" if there is a CLEAR and MEANINGFUL difference in health impact.
+- If both products have similar ingredients, similar processing levels, and similar health impacts, you MUST return "NEITHER".
+- Do NOT favor one product just because of brand perception or minor cosmetic differences.
+- Focus on actual ingredient differences that matter for the user's health conditions.
+- Be honest: if both products are equally good or equally bad, say so.
+
 Provide:
-1. recommendation: "A", "B", or "NEITHER" (if both are equally bad)
-2. summary: 2-3 sentence explanation of which is better and why
+1. recommendation: "A", "B", or "NEITHER" (if both are similar in health impact)
+2. summary: 2-3 sentence explanation. If NEITHER, explain why both are similar.
 3. detailed_comparison: Key differences relevant to user's health
 4. warnings: Any critical warnings for either product
 

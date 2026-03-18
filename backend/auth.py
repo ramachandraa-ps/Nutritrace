@@ -8,7 +8,7 @@ from database import get_db_connection
 from config import JWT_SECRET_KEY, JWT_EXPIRY_DAYS
 from middleware import token_required
 from validators import is_valid_email, is_valid_password, is_valid_phone, is_valid_fullname
-from email_service import send_otp_email
+from email_service import send_otp_email, send_signup_otp_email
 
 bcrypt = Bcrypt()
 
@@ -19,8 +19,8 @@ def init_bcrypt(app):
 
 def register_auth_routes(app):
 
-    @app.route('/auth/signup', methods=['POST'])
-    def signup():
+    @app.route('/auth/send-signup-otp', methods=['POST'])
+    def send_signup_otp():
         data = request.get_json()
         if not data:
             return jsonify({"success": False, "message": "No data provided"}), 400
@@ -55,6 +55,103 @@ def register_auth_routes(app):
 
         cursor = conn.cursor()
         try:
+            cursor.execute("SELECT id FROM users WHERE email = %s", (email,))
+            if cursor.fetchone():
+                return jsonify({"success": False, "message": "Email is already registered"}), 400
+
+            # Invalidate any existing unused signup OTPs for this email
+            cursor.execute(
+                "UPDATE signup_otps SET is_used = TRUE WHERE email = %s AND is_used = FALSE",
+                (email,)
+            )
+
+            otp = str(random.randint(1000, 9999))
+            expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
+
+            cursor.execute(
+                "INSERT INTO signup_otps (email, otp_code, expires_at) VALUES (%s, %s, %s)",
+                (email, otp, expires_at)
+            )
+            conn.commit()
+
+            try:
+                send_signup_otp_email(email, otp)
+            except Exception:
+                print(f"Warning: Could not send signup OTP email to {email}. OTP: {otp}")
+
+            return jsonify({"success": True, "message": "OTP sent to your email"}), 200
+
+        except Exception as e:
+            return jsonify({"success": False, "message": f"An error occurred: {str(e)}"}), 500
+        finally:
+            cursor.close()
+            conn.close()
+
+    @app.route('/auth/signup', methods=['POST'])
+    def signup():
+        data = request.get_json()
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+
+        fullname = data.get('fullname', '').strip()
+        phone = data.get('phone', '').strip()
+        email = data.get('email', '').strip().lower()
+        password = data.get('password', '')
+        confirm_password = data.get('confirm_password', '')
+        otp = data.get('otp', '').strip()
+
+        if not all([fullname, phone, email, password, confirm_password, otp]):
+            return jsonify({"success": False, "message": "All fields are required"}), 400
+
+        if not is_valid_fullname(fullname):
+            return jsonify({"success": False, "message": "Full name must contain only letters and spaces (min 3 chars)"}), 400
+
+        if not is_valid_phone(phone):
+            return jsonify({"success": False, "message": "Phone must be exactly 10 digits"}), 400
+
+        if not is_valid_email(email):
+            return jsonify({"success": False, "message": "Invalid email format"}), 400
+
+        if not is_valid_password(password):
+            return jsonify({"success": False, "message": "Password must be 8+ chars with uppercase, lowercase, digit, and special character"}), 400
+
+        if password != confirm_password:
+            return jsonify({"success": False, "message": "Passwords do not match"}), 400
+
+        conn = get_db_connection()
+        if conn is None:
+            return jsonify({"success": False, "message": "Database connection error"}), 500
+
+        cursor = conn.cursor(dictionary=True)
+        try:
+            # Verify OTP
+            cursor.execute(
+                """SELECT id, otp_code, expires_at FROM signup_otps
+                   WHERE email = %s AND is_used = FALSE
+                   ORDER BY created_at DESC""",
+                (email,)
+            )
+            otp_records = cursor.fetchall()
+
+            if not otp_records:
+                return jsonify({"success": False, "message": "No OTP found. Request a new one."}), 400
+
+            otp_record = None
+            for record in otp_records:
+                if record['otp_code'] == otp:
+                    otp_record = record
+                    break
+
+            if not otp_record:
+                return jsonify({"success": False, "message": "Invalid OTP"}), 400
+
+            if datetime.now(timezone.utc) > otp_record['expires_at'].replace(tzinfo=timezone.utc):
+                return jsonify({"success": False, "message": "OTP has expired. Request a new one."}), 400
+
+            # Mark OTP as used
+            cursor.execute("UPDATE signup_otps SET is_used = TRUE WHERE id = %s", (otp_record['id'],))
+
+            # Check duplicate email again (race condition guard)
             cursor.execute("SELECT id FROM users WHERE email = %s", (email,))
             if cursor.fetchone():
                 return jsonify({"success": False, "message": "Email is already registered"}), 400

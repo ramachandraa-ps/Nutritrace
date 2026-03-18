@@ -352,6 +352,7 @@ class CompareActivity : AppCompatActivity() {
                             when (recommendation) {
                                 "A" -> "${productA?.get("name")?.asString} is the better choice"
                                 "B" -> "${productB?.get("name")?.asString} is the better choice"
+                                "EQUAL" -> "Both products have similar health impact"
                                 else -> "Neither product is clearly better"
                             },
                             summary, recommendation
@@ -413,11 +414,6 @@ class CompareActivity : AppCompatActivity() {
         binding.llComparisonResults.visibility = View.VISIBLE
 
         binding.tvRecommendationSummary.text = recommendationText
-        when (recommendation) {
-            "A" -> binding.tvRecommendationTitle.text = "Choose $nameA"
-            "B" -> binding.tvRecommendationTitle.text = "Choose $nameB"
-            else -> binding.tvRecommendationTitle.text = "AI Recommendation"
-        }
 
         binding.tvNameA.text = nameA; binding.tvNameB.text = nameB
         binding.tvScoreA.text = "${scoreA}/100"; binding.tvScoreB.text = "${scoreB}/100"
@@ -427,22 +423,51 @@ class CompareActivity : AppCompatActivity() {
         binding.tvBrandB.text = if (brandB.isBlank() || brandB == "--") "--" else brandB
         binding.tvComparisonSummary.text = if (summary.isNotBlank()) summary else "No summary available."
 
-        val greenBg = R.drawable.bg_pill_green_light
+        val isEqual = recommendation == "EQUAL" || recommendation == "NEITHER"
         val whiteBg = R.drawable.bg_pill_white_border
-        val greenColor = resources.getColor(R.color.home_status_low, theme)
         val darkColor = Color.parseColor("#1E293B")
 
-        val aIsGreen = recommendation != "B"
-        fun style(tvA: TextView, tvB: TextView) {
-            tvA.setBackgroundResource(if (aIsGreen) greenBg else whiteBg)
-            tvA.setTextColor(if (aIsGreen) greenColor else darkColor)
-            tvB.setBackgroundResource(if (aIsGreen) whiteBg else greenBg)
-            tvB.setTextColor(if (aIsGreen) darkColor else greenColor)
+        if (isEqual) {
+            // Equal/similar products: neutral styling — no highlight on either side
+            binding.tvRecommendationTitle.text = "Similar Products"
+            binding.llRecommendationCard.setBackgroundResource(R.drawable.bg_neutral_recommendation)
+            binding.ivRecommendationIcon.setBackgroundResource(R.drawable.bg_icon_neutral_rounded)
+
+            fun styleNeutral(tvA: TextView, tvB: TextView) {
+                tvA.setBackgroundResource(whiteBg)
+                tvA.setTextColor(darkColor)
+                tvB.setBackgroundResource(whiteBg)
+                tvB.setTextColor(darkColor)
+            }
+            styleNeutral(binding.tvScoreA, binding.tvScoreB)
+            styleNeutral(binding.tvRiskA, binding.tvRiskB)
+            styleNeutral(binding.tvNameA, binding.tvNameB)
+            styleNeutral(binding.tvBrandA, binding.tvBrandB)
+        } else {
+            // Clear winner: highlight the better product in light blue
+            val blueBg = R.drawable.bg_pill_blue_light
+            val blueColor = Color.parseColor("#3B82F6")
+
+            binding.llRecommendationCard.setBackgroundResource(R.drawable.bg_blue_recommendation)
+            binding.ivRecommendationIcon.setBackgroundResource(R.drawable.bg_icon_blue_rounded)
+
+            when (recommendation) {
+                "A" -> binding.tvRecommendationTitle.text = "Choose $nameA"
+                "B" -> binding.tvRecommendationTitle.text = "Choose $nameB"
+            }
+
+            val aIsBetter = recommendation == "A"
+            fun styleHighlight(tvA: TextView, tvB: TextView) {
+                tvA.setBackgroundResource(if (aIsBetter) blueBg else whiteBg)
+                tvA.setTextColor(if (aIsBetter) blueColor else darkColor)
+                tvB.setBackgroundResource(if (aIsBetter) whiteBg else blueBg)
+                tvB.setTextColor(if (aIsBetter) darkColor else blueColor)
+            }
+            styleHighlight(binding.tvScoreA, binding.tvScoreB)
+            styleHighlight(binding.tvRiskA, binding.tvRiskB)
+            styleHighlight(binding.tvNameA, binding.tvNameB)
+            styleHighlight(binding.tvBrandA, binding.tvBrandB)
         }
-        style(binding.tvScoreA, binding.tvScoreB)
-        style(binding.tvRiskA, binding.tvRiskB)
-        style(binding.tvNameA, binding.tvNameB)
-        style(binding.tvBrandA, binding.tvBrandB)
 
         binding.tvChoiceAText.text = nameA
         binding.tvChoiceBText.text = nameB

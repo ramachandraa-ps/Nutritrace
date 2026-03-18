@@ -2,6 +2,7 @@ package com.simats.nutritrace
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -36,30 +37,14 @@ class RegisterActivity : AppCompatActivity() {
                 "confirm_password" to binding.etConfirmPassword.text.toString()
             )
 
-            ApiClient.post("/auth/signup", body) { success, json ->
+            // Step 1: Send OTP to email for verification
+            ApiClient.post("/auth/send-signup-otp", body) { success, json ->
                 runOnUiThread {
                     binding.btnCreateAccount.isEnabled = true
                     if (success && json?.get("success")?.asBoolean == true) {
-                        // Save token so health profile can be saved during onboarding
-                        json.get("token")?.asString?.let { token ->
-                            ApiClient.saveToken(this@RegisterActivity, token)
-                        }
-
-                        val dialogView = layoutInflater.inflate(R.layout.dialog_account_created, null)
-                        val dialog = android.app.AlertDialog.Builder(this@RegisterActivity)
-                            .setView(dialogView)
-                            .setCancelable(false)
-                            .create()
-                        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-                        dialog.show()
-
-                        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                            dialog.dismiss()
-                            startActivity(Intent(this@RegisterActivity, AgeSelectionActivity::class.java))
-                            finish()
-                        }, 2000)
+                        showOtpDialog(body)
                     } else {
-                        val message = json?.get("message")?.asString ?: "Registration failed"
+                        val message = json?.get("message")?.asString ?: "Failed to send OTP"
                         android.widget.Toast.makeText(this@RegisterActivity, message, android.widget.Toast.LENGTH_SHORT).show()
                     }
                 }
@@ -69,6 +54,114 @@ class RegisterActivity : AppCompatActivity() {
         binding.tvSignIn.setOnClickListener {
             finish()
         }
+    }
+
+    private fun showOtpDialog(signupBody: Map<String, String>) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_signup_otp, null)
+        val dialog = android.app.AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        val etOtp1 = dialogView.findViewById<EditText>(R.id.etOtp1)
+        val etOtp2 = dialogView.findViewById<EditText>(R.id.etOtp2)
+        val etOtp3 = dialogView.findViewById<EditText>(R.id.etOtp3)
+        val etOtp4 = dialogView.findViewById<EditText>(R.id.etOtp4)
+        val btnVerify = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnVerifyOtp)
+        val tvResend = dialogView.findViewById<TextView>(R.id.tvResendOtp)
+        val tvSubtitle = dialogView.findViewById<TextView>(R.id.tvOtpSubtitle)
+
+        tvSubtitle.text = "We sent a 4-digit code to ${signupBody["email"]}"
+
+        // Setup OTP auto-focus
+        val editTexts = arrayOf(etOtp1, etOtp2, etOtp3, etOtp4)
+        for (i in editTexts.indices) {
+            editTexts[i].addTextChangedListener(object : android.text.TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    if (s?.length == 1 && i < editTexts.size - 1) {
+                        editTexts[i + 1].requestFocus()
+                    }
+                }
+                override fun afterTextChanged(s: android.text.Editable?) {}
+            })
+            editTexts[i].setOnKeyListener(android.view.View.OnKeyListener { _, keyCode, event ->
+                if (event.action == android.view.KeyEvent.ACTION_DOWN && keyCode == android.view.KeyEvent.KEYCODE_DEL && editTexts[i].text.isEmpty() && i > 0) {
+                    editTexts[i - 1].requestFocus()
+                    editTexts[i - 1].text.clear()
+                    return@OnKeyListener true
+                }
+                false
+            })
+        }
+
+        // Verify button: call /auth/signup with OTP
+        btnVerify.setOnClickListener {
+            val otpCode = "${etOtp1.text}${etOtp2.text}${etOtp3.text}${etOtp4.text}"
+            if (otpCode.length != 4) {
+                android.widget.Toast.makeText(this, "Please enter the 4-digit code", android.widget.Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            btnVerify.isEnabled = false
+
+            val bodyWithOtp = signupBody.toMutableMap()
+            bodyWithOtp["otp"] = otpCode
+
+            ApiClient.post("/auth/signup", bodyWithOtp) { success, json ->
+                runOnUiThread {
+                    btnVerify.isEnabled = true
+                    if (success && json?.get("success")?.asBoolean == true) {
+                        json.get("token")?.asString?.let { token ->
+                            ApiClient.saveToken(this@RegisterActivity, token)
+                        }
+
+                        dialog.dismiss()
+
+                        // Show account created dialog
+                        val successView = layoutInflater.inflate(R.layout.dialog_account_created, null)
+                        val successDialog = android.app.AlertDialog.Builder(this@RegisterActivity)
+                            .setView(successView)
+                            .setCancelable(false)
+                            .create()
+                        successDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+                        successDialog.show()
+
+                        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                            successDialog.dismiss()
+                            startActivity(Intent(this@RegisterActivity, AgeSelectionActivity::class.java))
+                            finish()
+                        }, 2000)
+                    } else {
+                        val message = json?.get("message")?.asString ?: "Verification failed"
+                        android.widget.Toast.makeText(this@RegisterActivity, message, android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+
+        // Resend OTP
+        tvResend.setOnClickListener {
+            tvResend.isEnabled = false
+            ApiClient.post("/auth/send-signup-otp", signupBody) { success, json ->
+                runOnUiThread {
+                    tvResend.isEnabled = true
+                    if (success && json?.get("success")?.asBoolean == true) {
+                        android.widget.Toast.makeText(this, "OTP resent to your email", android.widget.Toast.LENGTH_SHORT).show()
+                        // Clear OTP fields
+                        editTexts.forEach { it.text.clear() }
+                        etOtp1.requestFocus()
+                    } else {
+                        val message = json?.get("message")?.asString ?: "Failed to resend OTP"
+                        android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+
+        dialog.show()
+        etOtp1.requestFocus()
     }
 
     private fun setupValidations() {

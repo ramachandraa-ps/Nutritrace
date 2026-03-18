@@ -131,6 +131,16 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS signup_otps (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            email VARCHAR(255) NOT NULL,
+            otp_code VARCHAR(10) NOT NULL,
+            expires_at TIMESTAMP NOT NULL,
+            is_used BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
         """
     ]
 
@@ -146,4 +156,4 @@ def init_db():
     conn.commit()
     cursor.close()
     conn.close()
-    print("All 8 tables ready.")
+    print("All 9 tables ready.")
