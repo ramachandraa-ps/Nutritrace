@@ -413,8 +413,6 @@ class CompareActivity : AppCompatActivity() {
         binding.llLoadingState.visibility = View.GONE
         binding.llComparisonResults.visibility = View.VISIBLE
 
-        binding.tvRecommendationSummary.text = recommendationText
-
         binding.tvNameA.text = nameA; binding.tvNameB.text = nameB
         binding.tvScoreA.text = "${scoreA}/100"; binding.tvScoreB.text = "${scoreB}/100"
         binding.tvRiskA.text = riskA.lowercase().replaceFirstChar { it.uppercase() }
@@ -423,7 +421,23 @@ class CompareActivity : AppCompatActivity() {
         binding.tvBrandB.text = if (brandB.isBlank() || brandB == "--") "--" else brandB
         binding.tvComparisonSummary.text = if (summary.isNotBlank()) summary else "No summary available."
 
-        val isEqual = recommendation == "EQUAL" || recommendation == "NEITHER"
+        // Override recommendation if score difference > 5
+        val scoreDiff = Math.abs(scoreA - scoreB)
+        val effectiveRecommendation = if (scoreDiff > 5 && (recommendation == "EQUAL" || recommendation == "NEITHER")) {
+            if (scoreA > scoreB) "A" else "B"
+        } else {
+            recommendation
+        }
+
+        // Update recommendation subtitle to match the effective recommendation
+        val effectiveText = when (effectiveRecommendation) {
+            "A" -> "$nameA is the better choice"
+            "B" -> "$nameB is the better choice"
+            else -> recommendationText
+        }
+        binding.tvRecommendationSummary.text = effectiveText
+
+        val isEqual = effectiveRecommendation == "EQUAL" || effectiveRecommendation == "NEITHER"
         val whiteBg = R.drawable.bg_pill_white_border
         val darkColor = Color.parseColor("#1E293B")
 
@@ -444,24 +458,24 @@ class CompareActivity : AppCompatActivity() {
             styleNeutral(binding.tvNameA, binding.tvNameB)
             styleNeutral(binding.tvBrandA, binding.tvBrandB)
         } else {
-            // Clear winner: highlight the better product in light blue
-            val blueBg = R.drawable.bg_pill_blue_light
-            val blueColor = Color.parseColor("#3B82F6")
+            // Clear winner: highlight the better product in sky blue
+            val skyBlueBg = R.drawable.bg_pill_skyblue_light
+            val skyBlueColor = Color.parseColor("#0EA5E9")
 
             binding.llRecommendationCard.setBackgroundResource(R.drawable.bg_blue_recommendation)
             binding.ivRecommendationIcon.setBackgroundResource(R.drawable.bg_icon_blue_rounded)
 
-            when (recommendation) {
+            when (effectiveRecommendation) {
                 "A" -> binding.tvRecommendationTitle.text = "Choose $nameA"
                 "B" -> binding.tvRecommendationTitle.text = "Choose $nameB"
             }
 
-            val aIsBetter = recommendation == "A"
+            val aIsBetter = effectiveRecommendation == "A"
             fun styleHighlight(tvA: TextView, tvB: TextView) {
-                tvA.setBackgroundResource(if (aIsBetter) blueBg else whiteBg)
-                tvA.setTextColor(if (aIsBetter) blueColor else darkColor)
-                tvB.setBackgroundResource(if (aIsBetter) whiteBg else blueBg)
-                tvB.setTextColor(if (aIsBetter) darkColor else blueColor)
+                tvA.setBackgroundResource(if (aIsBetter) skyBlueBg else whiteBg)
+                tvA.setTextColor(if (aIsBetter) skyBlueColor else darkColor)
+                tvB.setBackgroundResource(if (aIsBetter) whiteBg else skyBlueBg)
+                tvB.setTextColor(if (aIsBetter) darkColor else skyBlueColor)
             }
             styleHighlight(binding.tvScoreA, binding.tvScoreB)
             styleHighlight(binding.tvRiskA, binding.tvRiskB)

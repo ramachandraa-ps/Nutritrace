@@ -41,20 +41,28 @@ USER HEALTH PROFILE:
 INGREDIENTS (extracted from product label):
 {raw_text}
 
+IMPORTANT LANGUAGE GUIDELINES:
+- Use cautious, non-definitive language throughout ALL text fields (reason, overview, guidance, risk_analysis).
+- Use hedging words like "may", "could", "can", "might", "is generally associated with", "some studies suggest", "is often linked to" instead of making direct claims.
+- NEVER use words like "directly causes", "will harm", "is harmful", "is detrimental", "is dangerous", "negatively impacts", "worsens" as definitive statements.
+- Instead say "may contribute to", "could potentially affect", "is often considered", "may not be ideal for", "could be a concern for".
+- This applies to overview, ingredient reasons, guidance tips, and risk analysis descriptions.
+- The goal is to inform users about potential concerns without making absolute health claims about any product or ingredient.
+
 For each ingredient, provide:
 1. ingredient_name: The name of the ingredient
 2. status: SAFE, CAUTION, or AVOID
    - SAFE: No known health concerns for this user's profile
-   - CAUTION: May have mild effects or should be consumed in moderation
-   - AVOID: Directly harmful or triggers known conditions/allergies for this user
-3. reason: A short, clear explanation of why this status was assigned,
-   specifically referencing the user's conditions if relevant
+   - CAUTION: May have mild effects or could be worth consuming in moderation
+   - AVOID: Could potentially aggravate known conditions/allergies for this user
+3. reason: A short, clear explanation using cautious language (e.g. "may", "could", "can"),
+   referencing the user's conditions if relevant, without making absolute health claims
 
 Also provide:
-- overall_score: 0-100 (100 = perfectly safe, 0 = extremely harmful)
+- overall_score: 0-100 (100 = perfectly safe, 0 = highly concerning)
 - risk_level: LOW (score >= 70), MODERATE (40-69), HIGH (< 40)
-- overview: A 2-3 sentence summary of the product's safety for this user
-- guidance: 3-5 actionable recommendations
+- overview: A 2-3 sentence summary of the product's suitability for this user, using cautious language
+- guidance: 3-5 actionable recommendations using suggestive language (e.g. "consider", "you may want to")
 - sugar_estimate: estimated sugar content as a string like "12g" or "High" or "Low" (infer from ingredients)
 - additives_count: number of artificial additives, preservatives, or E-numbers found
 - allergens_found: list of allergens relevant to this user's sensitivities detected in ingredients
@@ -122,19 +130,21 @@ IMPORTANT GUIDELINES:
 - Do NOT favor one product just because of brand perception or minor cosmetic differences.
 - Focus on actual ingredient differences that matter for the user's health conditions.
 - Be honest: if both products are equally good or equally bad, say so.
+- Use cautious, non-definitive language throughout (e.g. "may", "could", "can", "might", "is generally associated with").
+- NEVER make absolute health claims like "directly causes", "is harmful", "will damage". Instead use "may contribute to", "could potentially affect", "is often considered".
 
 Provide:
 1. recommendation: "A", "B", or "NEITHER" (if both are similar in health impact)
-2. summary: 2-3 sentence explanation. If NEITHER, explain why both are similar.
+2. summary: 2-3 sentence explanation using cautious language. If NEITHER, explain why both are similar.
 3. detailed_comparison: Key differences relevant to user's health
-4. warnings: Any critical warnings for either product
+4. warnings: Any potential concerns for either product (use cautious language)
 
 Respond ONLY with valid JSON in this exact format:
 {{
     "recommendation": "A",
     "summary": "...",
     "detailed_comparison": {{
-        "harmful_ingredients": "...",
+        "ingredients_of_concern": "...",
         "overall": "..."
     }},
     "warnings": ["..."]

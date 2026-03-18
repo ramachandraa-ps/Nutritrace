@@ -120,6 +120,9 @@ def register_scan_routes(app):
                     "risk_level": risk_level,
                     "scanned_at": scanned_at,
                     "overview": overview,
+                    "sugar_estimate": ai_result.get('sugar_estimate', '--'),
+                    "additives_count": ai_result.get('additives_count', 0),
+                    "allergens_found": ai_result.get('allergens_found', []),
                     "ingredients": ingredients,
                     "risk_breakdown": risk_breakdown,
                     "guidance": guidance
@@ -242,6 +245,9 @@ def register_scan_routes(app):
                     "scanned_at": str(scan['scanned_at']),
                     "image_path": scan['image_path'],
                     "overview": ai_analysis.get('overview', ''),
+                    "sugar_estimate": ai_analysis.get('sugar_estimate', '--'),
+                    "additives_count": ai_analysis.get('additives_count', 0),
+                    "allergens_found": ai_analysis.get('allergens_found', []),
                     "ingredients": ingredients,
                     "risk_breakdown": risk_breakdown,
                     "guidance": ai_analysis.get('guidance', [])
