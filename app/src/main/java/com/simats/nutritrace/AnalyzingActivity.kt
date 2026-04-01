@@ -1,6 +1,7 @@
 package com.simats.nutritrace
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.simats.nutritrace.databinding.ActivityAnalyzingBinding
@@ -21,24 +22,10 @@ class AnalyzingActivity : AppCompatActivity() {
             return
         }
 
-        // Convert URI to File
-        val uri = android.net.Uri.parse(imageUriString)
-        val imageFile = try {
-            if (uri.scheme == "file") {
-                java.io.File(uri.path!!)
-            } else {
-                val inputStream = contentResolver.openInputStream(uri)
-                val tempFile = java.io.File(cacheDir, "scan_${System.currentTimeMillis()}.jpg")
-                inputStream?.use { input -> tempFile.outputStream().use { output -> input.copyTo(output) } }
-                tempFile
-            }
-        } catch (e: Exception) {
-            android.widget.Toast.makeText(this, "Failed to read image", android.widget.Toast.LENGTH_SHORT).show()
-            finish()
-            return
-        }
+        val uri = Uri.parse(imageUriString)
 
-        ApiClient.uploadImage(this, "/scan/analyze", imageFile) { success, json ->
+        // Local analysis: ML Kit OCR → Gemini AI (bypasses broken backend)
+        NutriTraceAI.analyzeImage(this, uri) { success, json ->
             runOnUiThread {
                 if (success && json?.get("success")?.asBoolean == true) {
                     val scanObj = json.getAsJsonObject("scan")

@@ -84,4 +84,7 @@ dependencies {
     
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    // ML Kit for on-device OCR (demo: bypasses broken backend Cloud Vision)
+    implementation("com.google.mlkit:text-recognition:16.0.1")
 }

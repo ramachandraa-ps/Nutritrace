@@ -24,6 +24,8 @@ class CompareActivity : AppCompatActivity() {
     private var scanIdA: Int? = null
     private var scanIdB: Int? = null
     private var isComparing = false
+    private var productDataA: com.google.gson.JsonObject? = null
+    private var productDataB: com.google.gson.JsonObject? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -301,62 +303,72 @@ class CompareActivity : AppCompatActivity() {
             binding.tvLoadingSubtitle.text = "Preparing comparison..."
         }
 
-        // Resolve scan IDs — upload images only for products that don't have IDs yet
-        resolveScanId("A") { idA ->
-            if (idA == null) {
+        // Resolve product data for both slots (local analysis or backend fetch)
+        resolveProductData("A") { dataA ->
+            if (dataA == null) {
                 isComparing = false
                 runOnUiThread { showError("Failed to analyze Product A"); resetToPlaceholder() }
-                return@resolveScanId
+                return@resolveProductData
             }
-            scanIdA = idA
+            productDataA = dataA
 
-            resolveScanId("B") { idB ->
-                if (idB == null) {
+            resolveProductData("B") { dataB ->
+                if (dataB == null) {
                     isComparing = false
                     runOnUiThread { showError("Failed to analyze Product B"); resetToPlaceholder() }
-                    return@resolveScanId
+                    return@resolveProductData
                 }
-                scanIdB = idB
+                productDataB = dataB
 
-                // Both IDs ready — compare
                 runOnUiThread { binding.tvLoadingSubtitle.text = "Comparing products with AI..." }
 
-                ApiClient.postAuth(this, "/compare", mapOf("scan_id_a" to idA, "scan_id_b" to idB)) { success, response ->
-                    isComparing = false
-                    if (!success || response == null) {
-                        runOnUiThread { showError(response?.get("message")?.asString ?: "Comparison failed"); resetToPlaceholder() }
-                        return@postAuth
-                    }
+                val nameA = dataA.get("product_name")?.asString ?: "Product A"
+                val nameB = dataB.get("product_name")?.asString ?: "Product B"
+                val ingredientsTextA = getIngredientsText(dataA)
+                val ingredientsTextB = getIngredientsText(dataB)
 
-                    val comparison = response.getAsJsonObject("comparison")
-                    if (comparison == null) {
-                        runOnUiThread { showError("Invalid comparison response"); resetToPlaceholder() }
-                        return@postAuth
-                    }
+                // Fetch health profile from backend (working), then compare locally via Gemini
+                NutriTraceAI.fetchHealthProfile(this@CompareActivity) { ageGroup, conditions, sensitivities ->
+                    NutriTraceAI.compareProducts(
+                        nameA, ingredientsTextA, nameB, ingredientsTextB,
+                        ageGroup, conditions, sensitivities
+                    ) { comparisonResult ->
+                        isComparing = false
+                        if (comparisonResult == null) {
+                            runOnUiThread { showError("Comparison failed"); resetToPlaceholder() }
+                            return@compareProducts
+                        }
 
-                    val productA = comparison.getAsJsonObject("product_a")
-                    val productB = comparison.getAsJsonObject("product_b")
-                    val recommendation = comparison.get("recommendation")?.asString ?: "NEITHER"
-                    val summary = comparison.get("summary")?.asString ?: ""
+                        val recommendation = comparisonResult.get("recommendation")?.asString ?: "NEITHER"
+                        val summary = comparisonResult.get("summary")?.asString ?: ""
+                        val scoreA = dataA.get("score")?.asInt ?: 0
+                        val scoreB = dataB.get("score")?.asInt ?: 0
+                        val brandA = dataA.get("brand_name")?.let { if (it.isJsonNull) "" else it.asString } ?: ""
+                        val brandB = dataB.get("brand_name")?.let { if (it.isJsonNull) "" else it.asString } ?: ""
+                        val riskA = dataA.get("risk_level")?.asString ?: "MODERATE"
+                        val riskB = dataB.get("risk_level")?.asString ?: "MODERATE"
 
-                    runOnUiThread {
-                        displayComparisonResults(
-                            productA?.get("name")?.asString ?: "Product A",
-                            productB?.get("name")?.asString ?: "Product B",
-                            productA?.get("brand")?.asString ?: "--",
-                            productB?.get("brand")?.asString ?: "--",
-                            productA?.get("score")?.asInt ?: 0,
-                            productB?.get("score")?.asInt ?: 0,
-                            productA?.get("risk_level")?.asString ?: "--",
-                            productB?.get("risk_level")?.asString ?: "--",
-                            when (recommendation) {
-                                "A" -> "${productA?.get("name")?.asString} is the better choice"
-                                "B" -> "${productB?.get("name")?.asString} is the better choice"
-                                "EQUAL" -> "Both products have similar health impact"
-                                else -> "Neither product is clearly better"
-                            },
-                            summary, recommendation
-                        )
+                        // Same override logic as backend: if scores within 5, treat as EQUAL
+                        val effectiveRec = if (Math.abs(scoreA - scoreB) <= 5) "EQUAL" else recommendation
+                        val effectiveSummary = if (effectiveRec == "EQUAL")
+                            "Both products have a similar health impact based on their ingredients."
+                        else summary
+
+                        runOnUiThread {
+                            displayComparisonResults(
+                                nameA, nameB,
+                                if (brandA.isBlank()) "--" else brandA,
+                                if (brandB.isBlank()) "--" else brandB,
+                                scoreA, scoreB, riskA, riskB,
+                                when (effectiveRec) {
+                                    "A" -> "$nameA is the better choice"
+                                    "B" -> "$nameB is the better choice"
+                                    "EQUAL" -> "Both products have similar health impact"
+                                    else -> "Neither product is clearly better"
+                                },
+                                effectiveSummary, effectiveRec
+                            )
+                        }
                     }
                 }
             }
@@ -364,41 +376,52 @@ class CompareActivity : AppCompatActivity() {
     }
 
     /**
-     * Resolve a scan ID for the given slot.
-     * If scanId is already set (from history), return it immediately.
-     * Otherwise, upload the image to /scan/analyze and return the new scan ID.
+     * Resolve product data for the given slot.
+     * If scanId exists (from history), fetch full scan from backend.
+     * Otherwise, analyze locally using ML Kit OCR + Gemini AI.
      */
-    private fun resolveScanId(slot: String, callback: (Int?) -> Unit) {
+    private fun resolveProductData(slot: String, callback: (com.google.gson.JsonObject?) -> Unit) {
         val existingId = if (slot == "A") scanIdA else scanIdB
         val uri = if (slot == "A") imageUriA else imageUriB
 
         if (existingId != null) {
-            // Already have a scan ID (from history) — skip upload
-            callback(existingId)
-            return
-        }
-
-        if (uri == null) {
-            callback(null)
-            return
-        }
-
-        runOnUiThread { binding.tvLoadingSubtitle.text = "Scanning Product $slot ingredients..." }
-
-        val file = uriToFile(uri)
-        if (file == null) {
-            callback(null)
-            return
-        }
-
-        ApiClient.uploadImage(this, "/scan/analyze", file) { success, response ->
-            if (!success || response == null) {
-                callback(null)
-                return@uploadImage
+            // Fetch from backend — GET /scan/<id> works fine
+            runOnUiThread { binding.tvLoadingSubtitle.text = "Loading Product $slot data..." }
+            ApiClient.getAuth(this, "/scan/$existingId") { success, json ->
+                if (success && json?.get("success")?.asBoolean == true) {
+                    callback(json.getAsJsonObject("scan"))
+                } else {
+                    callback(null)
+                }
             }
-            val scanId = response.getAsJsonObject("scan")?.get("id")?.asInt
-            file.delete()
-            callback(scanId)
+            return
+        }
+
+        if (uri != null) {
+            // Analyze locally using ML Kit + Gemini
+            runOnUiThread { binding.tvLoadingSubtitle.text = "Scanning Product $slot ingredients..." }
+            NutriTraceAI.analyzeImage(this, android.net.Uri.parse(uri)) { success, json ->
+                if (success && json != null) {
+                    callback(json.getAsJsonObject("scan"))
+                } else {
+                    callback(null)
+                }
+            }
+            return
+        }
+
+        callback(null)
+    }
+
+    private fun getIngredientsText(data: com.google.gson.JsonObject): String {
+        // Prefer raw OCR text if available (from local analysis)
+        val rawText = data.get("raw_ocr_text")?.let { if (it.isJsonNull) null else it.asString }
+        if (!rawText.isNullOrBlank()) return rawText
+
+        // Fallback: reconstruct from ingredient names (for history items fetched from backend)
+        val ingredients = data.getAsJsonArray("ingredients") ?: return ""
+        return (0 until ingredients.size()).joinToString(", ") { i ->
+            ingredients[i].asJsonObject.get("ingredient_name")?.asString ?: ""
         }
     }
 
